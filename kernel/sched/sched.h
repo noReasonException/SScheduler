@@ -12,7 +12,13 @@
 #include "cpupri.h"
 #include "cpudeadline.h"
 #include "cpuacct.h"
-
+/*
+if SS Scheduler in enabled by config
+then import the ss.c file
+*/
+#ifdef CONFIG_STEF_POLICY_CONFIG
+	#include "ss.c"
+#endif
 struct rq;
 struct cpuidle_state;
 
@@ -1237,7 +1243,12 @@ static inline void put_prev_task(struct rq *rq, struct task_struct *prev)
 	prev->sched_class->put_prev_task(rq, prev);
 }
 
-#define sched_class_highest (&stop_sched_class)
+#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+	#define sched_class_highest(&ss_sched_class)
+#else
+	#define sched_class_highest (&stop_sched_class)
+#endif
+
 #define for_each_class(class) \
    for (class = sched_class_highest; class; class = class->next)
 
