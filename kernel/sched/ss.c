@@ -12,7 +12,7 @@ dont forget to implement...
 	remove_ss_task_rb_tree 	(this time check dequeue_task)
 	ss_utill_task_is_dead	(must remove from linked list?(state ZOMBIE||DEAD),see dequeue_task)
 	remome_ss_task_list	(remome ss_task from linked list)
-*/
+*//
 
 const struct sched_class ss_sched_class={
 	.next			= &rt_sched_class,	//has the next scheduling module , the real time linux scheduler
@@ -28,7 +28,7 @@ enqueue_task_ss	procedure , is called by linux scheduler's class system when a s
 @param int wakeup
 
 
-*/
+*//
 static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 	struct ss_task *t=NULL; 		//every task_struct has a ss_task inside
 	if(p){
@@ -46,7 +46,7 @@ dequeue_task_ss	procedure , is called by linux scheduler's class system when a s
 @param struct rq *rq            the per-processor run queue
 @param struct task_struct *p    the task_struct who wants to exit from runqueue
 @param int sleep
-*/
+*//
 static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 {
 	struct ss_task *t=NULL;

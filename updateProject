@@ -5,6 +5,8 @@
 #1)Add a location parameter to search , remove hard-write path ~/...
 echo "Updating project...."
 echo "/kernel/sched"
+cp ~/linux-stable/kernel/sched/ss.h ~/SScheduler/kernel/sched/ss.h
+echo -e "\t ss.h   \t[OK]"
 cp ~/linux-stable/kernel/sched/ss.c ~/SScheduler/kernel/sched/ss.c
 echo -e "\t ss.c   \t[OK]"
 cp ~/linux-stable/kernel/sched/sched.h ~/SScheduler/kernel/sched/sched.h
@@ -26,7 +28,6 @@ echo "/include/uapi/linux"
 cp ~/linux-stable/include/uapi/linux/sched.h ~/SScheduler/include/uapi/linux/sched.h
 echo -e "\t sched.h   \t[OK]"
 
-
-
+find -name *.swp -delete
 git status
 git add *
