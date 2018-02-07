@@ -1,17 +1,17 @@
 #include "sched.h"
-
-
-
 //*
-	main scheduling class for Stefs EDF RT Scheduler
-	by noReasonException
-	version 0.0.1
-	last edited 6/2/2018
-	+--------------------------------------------------------------------------------+
-	Notes:
-	dont forget to implement...
-		find_ss_task 		(check enqueue_task_ss)
-		insert_ss_task_rb_tree	(check again , the enqueue_task_ss)
+main scheduling class for Stefs EDF RT Scheduler
+by noReasonException
+version 0.0.1
+last edited 6/2/2018
++--------------------------------------------------------------------------------+
+Notes -> to 0.0.1 final
+dont forget to implement...
+	find_ss_task 		(check enqueue_task_ss)
+	insert_ss_task_rb_tree	(check again , the enqueue_task_ss)
+	remove_ss_task_rb_tree 	(this time check dequeue_task)
+	ss_utill_task_is_dead	(must remove from linked list?(state ZOMBIE||DEAD),see dequeue_task)
+	remome_ss_task_list	(remome ss_task from linked list)
 */
 
 const struct sched_class ss_sched_class={
@@ -51,6 +51,12 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 {
 	struct ss_task *t=NULL;
 	if(p){
-		t=find_ss_task
+		if(t=find_ss_task(&rq->ss_rq,p)){
+			remove_ss_task_rb_tree(&rq->ss_rq,t);
+			atomic_dec(&rq->ss_rq.nr_running);
+			if(ss_utill_task_is_dead(p)){
+				rem_ss_task_list(&rq->ss_rq,t->task); //check again
+			}
+		}
 	}
 }
