@@ -89,7 +89,9 @@
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
-
+#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+	#include "ss_init.h"
+#endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 {
 	unsigned long delta;
@@ -272,12 +274,6 @@ static __init int sched_init_debug(void)
 {
 	debugfs_create_file("sched_features", 0644, NULL, NULL,
 			&sched_feat_fops);
-	printk(KERN_CRIT"sched: init hooked");
-	#ifdef SCHED_STEF_POLICY_CONFIG
-		printk(KERN_CRIT"EDF RT Stefs Scheduler v0.1 enabled");
-	#else
-		printk(KERN_CRIT"EDF RT Stefs Scheduler v0.1 not enabled!");
-	#endif
 
 	return 0;
 }
@@ -7171,6 +7167,14 @@ void __init sched_init(void)
 		init_cfs_rq(&rq->cfs);
 		init_rt_rq(&rq->rt, rq);
 		init_dl_rq(&rq->dl, rq);
+		/*
+		if SS Scheduler option is engaged , then initialize the ss_runqueue (rq->ss_rq)
+			using the init_ss_rq() (exist in ss_init.h)
+			the ss_init.h file is linked with core.o (for further info visit Makefile :) )
+		*/
+		#ifdef CONFIG_SCHED_POLICY_CONFIG
+			init_ss_rq(&rq->ss_rq);
+		#endif
 #ifdef CONFIG_FAIR_GROUP_SCHED
 		root_task_group.shares = ROOT_TASK_GROUP_LOAD;
 		INIT_LIST_HEAD(&rq->leaf_cfs_rq_list);
