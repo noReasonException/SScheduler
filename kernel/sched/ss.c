@@ -1,5 +1,7 @@
-#include "ss.h"
 #include "sched.h"
+
+/*[c]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
+/*[t]*/int		ss_utill_task_is_dead	(struct task_struct *p);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException
