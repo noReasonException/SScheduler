@@ -90,7 +90,7 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-	#include "ss_init.h"
+	static void init_ss_rq(struct ss_rq ** ss_rq);//forward declaration of initialization of each runqueue function
 #endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 {
@@ -7172,7 +7172,7 @@ void __init sched_init(void)
 			using the init_ss_rq() (exist in ss_init.h)
 			the ss_init.h file is linked with core.o (for further info visit Makefile :) )
 		*/
-		#ifdef CONFIG_SCHED_POLICY_CONFIG
+		#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
 			init_ss_rq(&rq->ss_rq);
 		#endif
 #ifdef CONFIG_FAIR_GROUP_SCHED
