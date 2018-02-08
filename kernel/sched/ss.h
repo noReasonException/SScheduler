@@ -1,3 +1,4 @@
+#include <linux/rbtree.h>
 /*
 ss_utill_task_is_dead(struct ss_task *ss_task)
 returns 1 if task must remove from linked list of tasks , 0 if not
@@ -31,3 +32,19 @@ struct ss_task *find_ss_task(struct ss_rq *ss_rq,struct task_struct *p){
 	}
 	return NULL;
 }
+/*
+struct ss_task *get_earliest_ss_task(struct ss_rq*)
+[n]
+@brief picks the leftmost node(with earliest deadline ;) )
+@param struct ss_rq , the currenly runqueue
+*/
+struct ss_task *get_earliest_ss_task(struct ss_rq*){
+	struct rb_root* temp_iterate  = &ss_rq->ss_root;
+	struct rb_node* temp_container=NULL;
+	while(temp_iterate->rb_left) {				//you must remember , in rb_tree , all leaf nodes does not
+		temp_iterate=temp_iterate->rb_left;		//contain data
+	}
+	return (struct ss_task)container_of(temp_iterate,struct ss_task,ss_node); //return the leftmode ss_struct pointer
+
+}
+

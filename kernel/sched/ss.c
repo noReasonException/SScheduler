@@ -2,6 +2,7 @@
 
 /*[c]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/int		ss_utill_task_is_dead	(struct task_struct *p);
+/*[n]*/struct ss_task * get_earliest_ss_task	(struct ss_rq*);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException
@@ -10,13 +11,13 @@ last edited 7/2/2018
 +--------------------------------------------------------------------------------+
 Notes -> to 0.0.1 final
 *)Dont forget to implement...
-	Name			Description								Status
-	find_ss_task 		(check enqueue_task_ss)							NO
-	insert_ss_task_rb_tree	(check again , the enqueue_task_ss)					NO
-	remove_ss_task_rb_tree 	(this time check dequeue_task)						NO
-	ss_utill_task_is_dead	(must remove from linked list?(state ZOMBIE||DEAD),see dequeue_task)  	Complete
-	remome_ss_task_list	(remome ss_task from linked list)					NO
-	get_earliest_ss_task	(Check the check_preempt_curr)						NO
+	Name			Description
+[t]	find_ss_task 		(check enqueue_task_ss)
+[n]	insert_ss_task_rb_tree	(check again , the enqueue_task_ss)
+[n]	remove_ss_task_rb_tree 	(this time check dequeue_task)
+[t]	ss_utill_task_is_dead	(must remove from linked list?(state ZOMBIE||DEAD),see dequeue_task)
+[n]	remome_ss_task_list	(remome ss_task from linked list)
+[n]	get_earliest_ss_task	(Check the check_preempt_curr)
 *)Some conversions...
 [n] :Function non implemented
 [c] :Currently Working on...
