@@ -546,7 +546,7 @@ struct ss_task{
 	struct 		rb_node 	ss_node;  		//node on red-black tree
 	unsigned 	long long 	absolute_deadline; 	//deadline-first appearance
 	struct 		list_head 	ss_list_node;		//circular double linked list node for ss tasks
-	struct 		task_strict 	*task;			//reference on task_struct
+	struct 		task_struct 	*task;			//reference on task_struct
 };
 //Represents a ss runqueue(per cpu)
 struct ss_rq{

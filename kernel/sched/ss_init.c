@@ -10,7 +10,7 @@
 [t]				No tested
 */
 
-static void init_ss_rq(struct ss_rq * ss_rq){
+extern void init_ss_rq(struct ss_rq * ss_rq){
 	ss_rq->ss_root=RB_ROOT;			//initialize red-black self-balanced tree
 	atomic_set(&ss_rq->nr_running,0);	//set the current running process counter to zero
 	INIT_LIST_HEAD(&ss_rq->ss_list);	//initialize the circular doubly linked list(for RUNNABLE TASKS)

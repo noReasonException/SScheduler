@@ -32,7 +32,7 @@ Notes -> to 0.0.1 final
 static void 	/**/		enqueue_task_ss		(struct rq *rq,struct task_struct *p,int wakeup);
 static void 	/**/		dequeue_task_ss		(struct rq *rq,struct task_struct *p,int sleep);
 static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task,int flags);
-static struct	task_struct*	pick_next_task_ss	(struct rq *rq);
+static struct	task_struct*	pick_next_task_ss	(struct rq *rq,struct task_struct *prev);
 
 
 const struct sched_class ss_sched_class={
@@ -40,7 +40,7 @@ const struct sched_class ss_sched_class={
 /*[t]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
 /*[t]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
 /*[t]*/	.check_preempt_curr	= check_preempt_curr_ss,//called to check if the newrly created task must preempt the current one...
-/*[n]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
+/*[t]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
 };
 
 /*
@@ -52,7 +52,7 @@ enqueue_task_ss	procedure , is called by linux scheduler's class system when a s
 static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 	struct ss_task *t=NULL; 		//every task_struct has a ss_task inside
 	if(p){
-		if((t=find_ss_task(rq,p))){
+		if((t=find_ss_task(&rq->ss_rq,p))){
 			t->absolute_deadline=sched_clock()+p->deadline;		//update new deadline!
 			insert_ss_task_rb_tree(&rq->ss_rq,t);			//add to red black tree
 			atomic_inc(&rq->ss_rq.nr_running);			//add one to current ss running processes!
@@ -123,5 +123,5 @@ version_before  version_after           brief                   solution        
                                                                 in 3.15-rc1)
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
-	return get_earliest_ss_task(&rq->ss_rq);
+	return get_earliest_ss_task(&rq->ss_rq)->task;
 }
