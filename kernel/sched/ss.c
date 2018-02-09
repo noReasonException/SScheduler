@@ -3,7 +3,7 @@
 /*[t]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/int		ss_utill_task_is_dead	(struct task_struct *p);
 /*[t]*/struct ss_task * get_earliest_ss_task	(struct ss_rq*);
-/*[c]*/int		insert_ss_task_ rb_tree (struct ss_rq*,struct ss_task*);
+/*[c]*/int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException

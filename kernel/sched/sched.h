@@ -539,20 +539,20 @@ extern struct root_domain def_root_domain;
 	*)UC
 	*)This is the main data structures needed for the algorithm...
 */
-#ifdef SCHED_STEF_POLICY_CONFIG
+#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
 
 //Represents an instance of an SS Task in memory (contains reference on real task_struct)
 struct ss_task{
 	struct 		rb_node 	ss_node;  		//node on red-black tree
 	unsigned 	long long 	absolute_deadline; 	//deadline-first appearance
 	struct 		list_head 	ss_list_node;		//circular double linked list node for ss tasks
-	struct 		task_strict 	*task			//reference on task_struct
+	struct 		task_strict 	*task;			//reference on task_struct
 };
 //Represents a ss runqueue(per cpu)
 struct ss_rq{
 	struct 		rb_root 	ss_root;		//Red black tree root (to select the earliest absolute deadline)
-	struct 		list_head	ss_list			//circular double linked list for all ss task in runqueue
-	atomic_t			nr_running		//how many tasks exist in this runqueue
+	struct 		list_head	ss_list;		//circular double linked list for all ss task in runqueue
+	atomic_t			nr_running;		//how many tasks exist in this runqueue
 
 };
 #endif
@@ -567,7 +567,7 @@ struct ss_rq{
  */
 struct rq {
 	//if Stefs EDF scheduler is engaged...
-	#ifdef SCHED_STEF_POLICY_CONFIG
+	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
 		struct ss_rq ss_rq;
 	#endif
 	/* runqueue lock: */
