@@ -31,7 +31,7 @@ Notes -> to 0.0.1 final
 /*Forward Declarations...*/
 static void 	/**/		enqueue_task_ss		(struct rq *rq,struct task_struct *p,int wakeup);
 static void 	/**/		dequeue_task_ss		(struct rq *rq,struct task_struct *p,int sleep);
-static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task);
+static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task,int flags);
 static struct	task_struct*	pick_next_task_ss	(struct rq *rq);
 
 
@@ -52,7 +52,7 @@ enqueue_task_ss	procedure , is called by linux scheduler's class system when a s
 static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 	struct ss_task *t=NULL; 		//every task_struct has a ss_task inside
 	if(p){
-		if(t=find_ss_task(rq,p)){
+		if((t=find_ss_task(rq,p))){
 			t->absolute_deadline=sched_clock()+p->deadline;		//update new deadline!
 			insert_ss_task_rb_tree(&rq->ss_rq,t);			//add to red black tree
 			atomic_inc(&rq->ss_rq.nr_running);			//add one to current ss running processes!
@@ -73,7 +73,7 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 {
 	struct ss_task *t=NULL;
 	if(p){
-		if(t=find_ss_task(&rq->ss_rq,p)){
+		if((t=find_ss_task(&rq->ss_rq,p))){
 			remove_ss_task_rb_tree(&rq->ss_rq,t);
 			atomic_dec(&rq->ss_rq.nr_running);
 			/*if(ss_utill_task_is_dead(p)){
@@ -83,11 +83,19 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 	}
 }
 /*check_preempt_curr_ss
-is called when we must check if it is nessesary to preempt the current running task
+@version 0.0.2
+
+@brief is called when we must check if it is nessesary to preempt the current running task
 @param struct rq* rq , The current runqueue
 @param struct task   ,the task witch became runnable
+
+Revisions
+version_before	version_after		brief			solution		status
+0.0.1		0.0.2			compatibility issue	add a int flags		Fixed
+								parameter (introduced
+								in version 2.6.32.71)
 */
-static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task ){
+static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task,int flags ){
 	struct ss_task *earl_task	=NULL; //The leftmost node of red-black tree(a.k.a earliest deadline)
 	struct ss_task *curr_task	=NULL; //The Current running task
 	if(atomic_read(&rq->ss_rq.nr_running)	//if there exist at least one task in runqueue
@@ -95,9 +103,9 @@ static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task ){
 		resched_task(rq->curr);
 	}
 	else{ //in other case , just pick the task with earliest deadline (Leftmost of red-black tree)
-		if(earl_task=get_earliest_ss_task(&rq->ss_rq)){          //get earliest
-			if(curr_task=find_ss_task(&rq->ss_rq,rq->curr)){ //get current
-				if(earl_task->absolute_deadline < curr_task->absolute_deadline){ //compare!
+		if((earl_task=get_earliest_ss_task(&rq->ss_rq))){          //get earliest
+			if((curr_task=find_ss_task(&rq->ss_rq,rq->curr))){ //get current
+				if((earl_task->absolute_deadline < curr_task->absolute_deadline)){ //compare!
 					resched_task(rq->curr);
 				}
 			}
@@ -105,10 +113,15 @@ static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task ){
 	}
 }
 /*pick_next_task_ss
-Returns the most appropiate task to run (this one with the earliest absolute deadline)
+@version 0.0.2
+@brief Returns the most appropiate task to run (this one with the earliest absolute deadline)
 @param struct rq *rq , The current runqueue
-
+Revisions
+version_before  version_after           brief                   solution                status
+0.0.1           0.0.2                   compatibility issue    	task_struct *ptr in	Fixed
+								param list (introduced
+                                                                in 3.15-rc1)
 */
-static struct task_struct *pick_next_task_ss(struct rq *rq){
+static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
 	return get_earliest_ss_task(&rq->ss_rq);
 }
