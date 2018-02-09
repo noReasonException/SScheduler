@@ -1,5 +1,6 @@
 #include "sched.h" //to reference struct ss_rq on that file
-#include <lib/rbtree.h>
+#include <linux/rbtree.h>
+#include <asm/atomic.h>
 /*
 
 *)static void init_ss_rq(struct ss_rq**)

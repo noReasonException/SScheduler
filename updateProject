@@ -10,8 +10,8 @@ echo -e "\t ss.h   \t[OK]"
 cp ~/linux-stable/kernel/sched/ss.c ~/SScheduler/kernel/sched/ss.c
 echo -e "\t ss.c   \t[OK]"
 
-cp ~/linux-stable/kernel/sched/ss_init.h ~/SScheduler/kernel/sched/ss_init.h
-echo -e "\t ss_init.h   \t[OK]"
+cp ~/linux-stable/kernel/sched/ss_init.c ~/SScheduler/kernel/sched/ss_init.c
+echo -e "\t ss_init.c   \t[OK]"
 
 cp ~/linux-stable/kernel/sched/sched.h ~/SScheduler/kernel/sched/sched.h
 echo -e "\t sched.h \t[OK]"
