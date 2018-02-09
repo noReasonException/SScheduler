@@ -1,8 +1,9 @@
 #include "sched.h"
 
-/*[c]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
+/*[t]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/int		ss_utill_task_is_dead	(struct task_struct *p);
-/*[n]*/struct ss_task * get_earliest_ss_task	(struct ss_rq*);
+/*[t]*/struct ss_task * get_earliest_ss_task	(struct ss_rq*);
+/*[c]*/int		insert_ss_task_ rb_tree (struct ss_rq*,struct ss_task*);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException
@@ -17,7 +18,7 @@ Notes -> to 0.0.1 final
 [n]	remove_ss_task_rb_tree 	(this time check dequeue_task)
 [t]	ss_utill_task_is_dead	(must remove from linked list?(state ZOMBIE||DEAD),see dequeue_task)
 [n]	remome_ss_task_list	(remome ss_task from linked list)
-[n]	get_earliest_ss_task	(Check the check_preempt_curr)
+[t]	get_earliest_ss_task	(Check the check_preempt_curr)
 *)Some conversions...
 [n] :Function non implemented
 [c] :Currently Working on...
