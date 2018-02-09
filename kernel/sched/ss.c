@@ -1,5 +1,5 @@
 #include "sched.h"
-
+void resched_curr(struct rq *rq); //forward declaration 
 /*[t]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/int		ss_utill_task_is_dead	(struct task_struct *p);
 /*[t]*/struct ss_task * get_earliest_ss_task	(struct ss_rq*);
@@ -83,7 +83,7 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 	}
 }
 /*check_preempt_curr_ss
-@version 0.0.2
+@version 0.0.3
 
 @brief is called when we must check if it is nessesary to preempt the current running task
 @param struct rq* rq , The current runqueue
@@ -94,19 +94,23 @@ version_before	version_after		brief			solution		status
 0.0.1		0.0.2			compatibility issue	add a int flags		Fixed
 								parameter (introduced
 								in version 2.6.32.71)
+0.0.2		0.0.3			compatibility issue	replace resched_task	Fixed
+								with resched_curr
+								(introduced to patch
+								4443611 v3.16.x)
 */
 static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task,int flags ){
 	struct ss_task *earl_task	=NULL; //The leftmost node of red-black tree(a.k.a earliest deadline)
 	struct ss_task *curr_task	=NULL; //The Current running task
 	if(atomic_read(&rq->ss_rq.nr_running)	//if there exist at least one task in runqueue
 		&&rq->curr->policy!=SCHED_SS){//and the current task is not a SS task
-		resched_task(rq->curr);
+		resched_curr(rq);
 	}
 	else{ //in other case , just pick the task with earliest deadline (Leftmost of red-black tree)
 		if((earl_task=get_earliest_ss_task(&rq->ss_rq))){          //get earliest
 			if((curr_task=find_ss_task(&rq->ss_rq,rq->curr))){ //get current
 				if((earl_task->absolute_deadline < curr_task->absolute_deadline)){ //compare!
-					resched_task(rq->curr);
+					resched_curr(rq);
 				}
 			}
 		}
