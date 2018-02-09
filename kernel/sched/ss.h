@@ -77,3 +77,15 @@ int insert_ss_task_ rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task){
 	return 1;
 }
 
+/*
+int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task *ss_task)
+@brief removes a task from red-black tree :O
+@param struct ss_rq  *ss_rq , the current runqueue
+@param struct ss_task*ss_task ,the process to remove from red-black tree
+@return 1 on success , 0 otherwise
+*/
+int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task*ss_task){
+	rb_erase(&ss_task->ss_node,ss_rq->ss_root->rb_node);
+	return 1;
+
+}

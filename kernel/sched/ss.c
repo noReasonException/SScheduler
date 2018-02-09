@@ -14,10 +14,10 @@ Notes -> to 0.0.1 final
 *)Dont forget to implement...
 	Name			Description
 [t]	find_ss_task 		(check enqueue_task_ss)
-[n]	insert_ss_task_rb_tree	(check again , the enqueue_task_ss)
+[t]	insert_ss_task_rb_tree	(check again , the enqueue_task_ss)
 [n]	remove_ss_task_rb_tree 	(this time check dequeue_task)
 [t]	ss_utill_task_is_dead	(must remove from linked list?(state ZOMBIE||DEAD),see dequeue_task)
-[n]	remome_ss_task_list	(remome ss_task from linked list)
+[n]	remove_ss_task_list	(remome ss_task from linked list)
 [t]	get_earliest_ss_task	(Check the check_preempt_curr)
 *)Some conversions...
 [n] :Function non implemented
@@ -67,9 +67,9 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 		if(t=find_ss_task(&rq->ss_rq,p)){
 			remove_ss_task_rb_tree(&rq->ss_rq,t);
 			atomic_dec(&rq->ss_rq.nr_running);
-			if(ss_utill_task_is_dead(p)){
-				rem_ss_task_list(&rq->ss_rq,t->task); //check again
-			}
+			/*if(ss_utill_task_is_dead(p)){
+				rem_ss_task_list(&rq->ss_rq,t->task); //TODO:Dont forget to implement
+			}*/
 		}
 	}
 }
