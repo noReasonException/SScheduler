@@ -3,7 +3,8 @@
 /*[t]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/int		ss_utill_task_is_dead	(struct task_struct *p);
 /*[t]*/struct ss_task * get_earliest_ss_task	(struct ss_rq*);
-/*[c]*/int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*);
+/*[t]*/int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*);
+/*[t]*/int 		remove_ss_task_rb_tree	(struct ss_rq*,struct ss_task*);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException
@@ -26,6 +27,14 @@ Notes -> to 0.0.1 final
 [*] :Completed
 */
 
+
+/*Forward Declarations...*/
+static void 	/**/		enqueue_task_ss		(struct rq *rq,struct task_struct *p,int wakeup);
+static void 	/**/		dequeue_task_ss		(struct rq *rq,struct task_struct *p,int sleep);
+static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task);
+static struct	task_struct*	pick_next_task_ss	(struct rq *rq);
+
+
 const struct sched_class ss_sched_class={
 /*[*]*/	.next			= &rt_sched_class,	//has the next scheduling module , the real time linux scheduler
 /*[t]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
@@ -43,7 +52,7 @@ enqueue_task_ss	procedure , is called by linux scheduler's class system when a s
 static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 	struct ss_task *t=NULL; 		//every task_struct has a ss_task inside
 	if(p){
-		if((t=find_ss_task(rq,p)){
+		if(t=find_ss_task(rq,p)){
 			t->absolute_deadline=sched_clock()+p->deadline;		//update new deadline!
 			insert_ss_task_rb_tree(&rq->ss_rq,t);			//add to red black tree
 			atomic_inc(&rq->ss_rq.nr_running);			//add one to current ss running processes!
@@ -82,7 +91,7 @@ static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task ){
 	struct ss_task *earl_task	=NULL; //The leftmost node of red-black tree(a.k.a earliest deadline)
 	struct ss_task *curr_task	=NULL; //The Current running task
 	if(atomic_read(&rq->ss_rq.nr_running)	//if there exist at least one task in runqueue
-		&&rq->curr->policy!=STEF_SCHED){//and the current task is not a SS task
+		&&rq->curr->policy!=SCHED_SS){//and the current task is not a SS task
 		resched_task(rq->curr);
 	}
 	else{ //in other case , just pick the task with earliest deadline (Leftmost of red-black tree)
