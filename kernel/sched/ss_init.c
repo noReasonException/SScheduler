@@ -1,6 +1,7 @@
 #include "sched.h" //to reference struct ss_rq on that file
 #include <linux/rbtree.h>
 #include <asm/atomic.h>
+#include "ss_debug.h"
 /*
 
 *)static void init_ss_rq(struct ss_rq**)
@@ -10,8 +11,9 @@
 [t]				No tested
 */
 
-extern void init_ss_rq(struct ss_rq * ss_rq){
+extern void init_ss_rq(struct ss_rq * ss_rq,int cpu_id){
 	ss_rq->ss_root=RB_ROOT;			//initialize red-black self-balanced tree
 	atomic_set(&ss_rq->nr_running,0);	//set the current running process counter to zero
 	INIT_LIST_HEAD(&ss_rq->ss_list);	//initialize the circular doubly linked list(for RUNNABLE TASKS)
+	ss_debug("ss runqueue(ss_rq) initialized on processor %d \n",cpu_id);
 }

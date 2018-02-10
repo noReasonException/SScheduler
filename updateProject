@@ -5,11 +5,12 @@
 #1)Add a location parameter to search , remove hard-write path ~/...
 echo "Updating project...."
 echo "/kernel/sched"
-cp ~/linux-stable/kernel/sched/ss.h ~/SScheduler/kernel/sched/ss.h
-echo -e "\t ss.h   \t[OK]"
+cp ~/linux-stable/kernel/sched/ss_utill.c ~/SScheduler/kernel/sched/ss_utill.c
+echo -e "\t ss_utill.c   \t[OK]"
 cp ~/linux-stable/kernel/sched/ss.c ~/SScheduler/kernel/sched/ss.c
 echo -e "\t ss.c   \t[OK]"
-
+cp ~/linux-stable/kernel/sched/ss_debug.h ~/SScheduler/kernel/sched/ss_debug.h
+echo -e "\t ss_debug.h   \t[OK]"
 cp ~/linux-stable/kernel/sched/ss_init.c ~/SScheduler/kernel/sched/ss_init.c
 echo -e "\t ss_init.c   \t[OK]"
 

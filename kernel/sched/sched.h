@@ -1251,7 +1251,9 @@ extern const struct sched_class fair_sched_class;
 extern const struct sched_class idle_sched_class;
 
 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-        #define sched_class_highest (&ss_sched_class)
+       // #define sched_class_highest (&ss_sched_class)
+	#define sched_class_highest (&stop_sched_class) //TODO : enable ss_sched_class
+
 #else
         #define sched_class_highest (&stop_sched_class)
 #endif

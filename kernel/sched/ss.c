@@ -1,10 +1,10 @@
 #include "sched.h"
-void resched_curr(struct rq *rq); //forward declaration 
-/*[t]*/struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
-/*[t]*/int		ss_utill_task_is_dead	(struct task_struct *p);
-/*[t]*/struct ss_task * get_earliest_ss_task	(struct ss_rq*);
-/*[t]*/int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*);
-/*[t]*/int 		remove_ss_task_rb_tree	(struct ss_rq*,struct ss_task*);
+extern void resched_curr(struct rq *rq); //forward declaration
+/*[t]*/extern struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
+/*[t]*/extern int		ss_utill_task_is_dead	(struct task_struct *p);
+/*[t]*/extern struct ss_task * get_earliest_ss_task	(struct ss_rq*);
+/*[t]*/extern int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*);
+/*[t]*/extern int 		remove_ss_task_rb_tree	(struct ss_rq*,struct ss_task*);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException

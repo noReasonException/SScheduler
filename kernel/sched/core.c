@@ -91,7 +91,7 @@
 #include <trace/events/sched.h>
 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
 struct ss_rq;
-extern void init_ss_rq(struct ss_rq *);//forward declaration of initialization of each runqueue function
+extern void init_ss_rq(struct ss_rq *,int i);//forward declaration of initialization of each runqueue function
 #endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 {
@@ -7096,8 +7096,7 @@ void __init sched_init(void)
 {
 	int i, j;
 	unsigned long alloc_size = 0, ptr;
-	printk(KERN_CRIT"sched_init hook");
-#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
 	printk(KERN_CRIT"ss: sched engaged");
 #else
 	printk(KERN_CRIT"ss: not engaged");
@@ -7174,7 +7173,7 @@ void __init sched_init(void)
 			the ss_init.h file is linked with core.o (for further info visit Makefile :) )
 		*/
 		#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-			init_ss_rq(&rq->ss_rq);
+			init_ss_rq(&rq->ss_rq,i);
 		#endif
 #ifdef CONFIG_FAIR_GROUP_SCHED
 		root_task_group.shares = ROOT_TASK_GROUP_LOAD;
