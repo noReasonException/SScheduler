@@ -6,10 +6,9 @@ returns 1 if task must remove from linked list of tasks , 0 if not
 @param ss_task the ss_task of the task to examine  @see sched.h/struct ss_task
 */
 extern int ss_utill_task_is_dead(struct ss_task *ss_task){
-
-	return ss_task->task.state==TASK_DEAD||
-		ss_task->task.state==EXIT_DEAD||
-		ss_task->task.state==EXIT_ZOMBIE;
+	return ss_task->task->state==TASK_DEAD||
+		ss_task->task->state==EXIT_DEAD||
+		ss_task->task->state==EXIT_ZOMBIE;
 
 
 }
@@ -30,7 +29,7 @@ extern struct ss_task *find_ss_task(struct ss_rq *ss_rq,struct task_struct *p){
 	struct list_head*htmp;			//temponary variable to each list node
 	struct ss_task  *tmp; 			//temponary var , to iterate over each element
 	list_for_each(htmp,&ss_rq->ss_list) {
-		tmp=list_entry(htmp,struct ss_task,ss_list);
+		tmp=list_entry(htmp,struct ss_task,ss_list_node);
 		if(tmp->task==p)return tmp;
 	}
 	return NULL;
