@@ -1,4 +1,5 @@
 #include "sched.h"
+#include "ss_debug.h"
 extern void resched_curr(struct rq *rq); //forward declaration
 /*[t]*/extern struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/extern int		ss_utill_task_is_dead	(struct task_struct *p);
@@ -36,7 +37,7 @@ static struct	task_struct*	pick_next_task_ss	(struct rq *rq,struct task_struct *
 
 
 const struct sched_class ss_sched_class={
-/*[*]*/	.next			= &rt_sched_class,	//has the next scheduling module , the real time linux scheduler
+/*[*]*/	.next			= &dl_sched_class,	//has the next scheduling module , the real time linux scheduler
 /*[t]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
 /*[t]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
 /*[t]*/	.check_preempt_curr	= check_preempt_curr_ss,//called to check if the newrly created task must preempt the current one...
@@ -50,6 +51,7 @@ enqueue_task_ss	procedure , is called by linux scheduler's class system when a s
 @param int wakeup
 */
 static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
+	ss_debug("enqueue_task_ss hooked");
 	struct ss_task *t=NULL; 		//every task_struct has a ss_task inside
 	if(p){
 		if((t=find_ss_task(&rq->ss_rq,p))){
@@ -71,6 +73,7 @@ is called by linux scheduler's class system when a ss task want to quit from TAS
 */
 static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 {
+	ss_debug("dequeue_task_ss hooked");
 	struct ss_task *t=NULL;
 	if(p){
 		if((t=find_ss_task(&rq->ss_rq,p))){
@@ -100,6 +103,7 @@ version_before	version_after		brief			solution		status
 								4443611 v3.16.x)
 */
 static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task,int flags ){
+	ss_debug("check_preempt_curr_ss hooked");
 	struct ss_task *earl_task	=NULL; //The leftmost node of red-black tree(a.k.a earliest deadline)
 	struct ss_task *curr_task	=NULL; //The Current running task
 	if(atomic_read(&rq->ss_rq.nr_running)	//if there exist at least one task in runqueue
@@ -127,5 +131,7 @@ version_before  version_after           brief                   solution        
                                                                 in 3.15-rc1)
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
-	return get_earliest_ss_task(&rq->ss_rq)->task;
+	ss_debug("pick_next_task_ss hooked,NULL returned");
+	return NULL;
+	//return get_earliest_ss_task(&rq->ss_rq)->task;
 }

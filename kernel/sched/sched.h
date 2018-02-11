@@ -12,12 +12,6 @@
 #include "cpupri.h"
 #include "cpudeadline.h"
 #include "cpuacct.h"
-
-/*#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-        #warning "ss.c included"
-        #include "ss.c"
-#endif
-*/
 struct rq;
 struct cpuidle_state;
 
@@ -1251,7 +1245,7 @@ extern const struct sched_class fair_sched_class;
 extern const struct sched_class idle_sched_class;
 
 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-       // #define sched_class_highest (&ss_sched_class)
+       	//#define sched_class_highest (&ss_sched_class)
 	#define sched_class_highest (&stop_sched_class) //TODO : enable ss_sched_class
 
 #else
