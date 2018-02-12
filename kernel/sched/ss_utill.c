@@ -38,17 +38,15 @@ extern struct ss_task *find_ss_task(struct ss_rq *ss_rq,struct task_struct *p){
 /*
 struct ss_task *get_earliest_ss_task(struct ss_rq*)
 [t]
+@version 0.0.1
 @brief picks the leftmost node(with earliest deadline ;) )
 @param struct ss_rq , the currenly runqueue
 */
 extern struct ss_task *get_earliest_ss_task(struct ss_rq*ss_rq){
-	struct rb_root* temp_iterate  = &ss_rq->ss_root;
-	struct rb_node* temp_container=NULL;
-	while(temp_iterate->rb_left) {				//you must remember , in rb_tree , all leaf nodes does not
-		temp_iterate=temp_iterate->rb_left;		//contain data
-	}
-	return (struct ss_task)container_of(temp_iterate,struct ss_task,ss_node); //return the leftmode ss_struct pointer
-
+	struct rb_node *temp = ss_rq->ss_root.rb_node;
+	if(atomic_read(&ss_rq->nr_running)==0)return NULL;		//if no tasks exist in runqueue , then return NULL
+	while(temp->rb_left)temp=temp->rb_left;				//traverse the list untill the left node is null
+	return (struct ss_task*)rb_entry(temp,struct ss_task,ss_node);	//return the task existed there! :)
 }
 /*
 int insert_ss_task_rb_tree(struct ss_rq*,struct ss_task*)

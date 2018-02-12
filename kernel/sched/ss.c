@@ -132,6 +132,9 @@ version_before  version_after           brief                   solution        
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
 	ss_debug("pick_next_task_ss hooked,NULL returned");
+	if(atomic_read(&(rq->ss_rq.nr_running))==0){
+		return NULL;
+	}
 	return NULL;
 	//return get_earliest_ss_task(&rq->ss_rq)->task;
 }
