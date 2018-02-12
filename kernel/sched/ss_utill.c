@@ -55,11 +55,11 @@ int insert_ss_task_rb_tree(struct ss_rq*,struct ss_task*)
 @param struct ss_task* ss_task -> The process to insert in rbtree!
 @returns >1 if all okay , 0 otherwise*/
 extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task){
-	struct rb_node * temp  = &(ss_rq->ss_root.rb_node);	//At first , temp node starts from root node!
+	struct rb_node * temp  = ss_rq->ss_root.rb_node ;	//At first , temp node starts from root node!
 	struct rb_node * parent= NULL;				//..and of course , has no parent :P
 	struct ss_task * temp_container=NULL;			//temp's container
 	while(temp) {						//while temp variable isnt NULL (0)
-		temp_container=container_of(*temp,struct ss_task,ss_node);
+		temp_container=container_of(temp,struct ss_task,ss_node);
 		parent=temp;
 		if(ss_task->absolute_deadline< temp_container->absolute_deadline){
 			temp=temp->rb_left;
@@ -72,7 +72,7 @@ extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task){
 			return 0;
 		}
 	}
-	rb_link_node(&ss_task->ss_node,parent,temp);		//insert into rbtree
+	rb_link_node(&ss_task->ss_node,parent,&temp);		//insert into rbtree
 	rb_insert_color(&ss_task->ss_node,&ss_rq->ss_root);	//rebalance if nessesary
 	return 1;
 }
@@ -85,7 +85,7 @@ int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task *ss_task)
 @return 1 on success , 0 otherwise
 */
 extern int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task*ss_task){
-	rb_erase(&ss_task->ss_node,ss_rq->ss_root.rb_node);
+	rb_erase(&ss_task->ss_node,&ss_rq->ss_root);
 	return 1;
 
 }
