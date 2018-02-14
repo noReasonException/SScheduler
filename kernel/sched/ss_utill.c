@@ -1,5 +1,6 @@
 #include <linux/rbtree.h>
 #include "sched.h"
+#include "ss.h"
 /*
 ss_utill_task_is_dead(struct ss_task *ss_task)
 returns 1 if task must remove from linked list of tasks , 0 if not
@@ -50,11 +51,22 @@ extern struct ss_task *get_earliest_ss_task(struct ss_rq*ss_rq){
 }
 /*
 int insert_ss_task_rb_tree(struct ss_rq*,struct ss_task*)
+@version 0.0.2
 @brief Imports a new task into sscheduler's red-black tree!
 @param struct ss_rq  * ss_rq   -> The current runqueue
 @param struct ss_task* ss_task -> The process to insert in rbtree!
-@returns >1 if all okay , 0 otherwise*/
-extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task){
+@returns >1 if all okay , 0 otherwise
+Revisions
+version_before  version_after           brief                   solution                status
+0.0.1           0.0.2                   known kernel bug     	quick and dirty		FIX
+								fix of known kernel
+								bug of infinite loop
+								on rb_insert_color()
+								insert an flags param
+
+*/
+
+extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task,int flags){
 	struct rb_node * temp  = ss_rq->ss_root.rb_node ;	//At first , temp node starts from root node!
 	struct rb_node * parent= NULL;				//..and of course , has no parent :P
 	struct ss_task * temp_container=NULL;			//temp's container
@@ -73,7 +85,9 @@ extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task){
 		}
 	}
 	rb_link_node(&ss_task->ss_node,parent,&temp);		//insert into rbtree
-	rb_insert_color(&ss_task->ss_node,&ss_rq->ss_root);	//rebalance if nessesary
+	if(flags&SS_ALLOW_RECOLOR){
+		rb_insert_color(&ss_task->ss_node,&ss_rq->ss_root);	//rebalance if nessesary
+	}
 	return 1;
 }
 

@@ -1,5 +1,5 @@
 #define ss_debug_lvl KERN_CRIT
-#define ss_debug(...) printk("ss: " __VA_ARGS__ )
+#define ss_debug(...) printk(ss_debug_lvl"ss: " __VA_ARGS__ )
 
 
 

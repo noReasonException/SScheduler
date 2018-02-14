@@ -1,10 +1,11 @@
 #include "sched.h"
 #include "ss_debug.h"
+#include "ss.h"
 extern void resched_curr(struct rq *rq); //forward declaration
 /*[t]*/extern struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/extern int		ss_utill_task_is_dead	(struct task_struct *p);
 /*[t]*/extern struct ss_task * get_earliest_ss_task	(struct ss_rq*);
-/*[t]*/extern int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*);
+/*[t]*/extern int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*,int flags);
 /*[t]*/extern int 		remove_ss_task_rb_tree	(struct ss_rq*,struct ss_task*);
 /*
 main scheduling class for Stefs EDF RT Scheduler
@@ -56,7 +57,13 @@ static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 	if(p){
 		if((t=find_ss_task(&rq->ss_rq,p))){
 			t->absolute_deadline=sched_clock()+p->deadline;		//update new deadline!
-			insert_ss_task_rb_tree(&rq->ss_rq,t);			//add to red black tree
+			if(atomic_read(&rq->ss_rq.nr_running)){
+				insert_ss_task_rb_tree(&rq->ss_rq,t,SS_NOFLAG);         //add to red black tree
+			}
+			else{
+				insert_ss_task_rb_tree(&rq->ss_rq,t,SS_ALLOW_RECOLOR);         //add to red black tree
+			}
+			insert_ss_task_rb_tree(&rq->ss_rq,t,SS_NOFLAG);		//add to red black tree
 			atomic_inc(&rq->ss_rq.nr_running);			//add one to current ss running processes!
 			printk(KERN_CRIT"ss:new task submitted");		//debug purposes...
 		}
@@ -131,6 +138,9 @@ version_before  version_after           brief                   solution        
                                                                 in 3.15-rc1)
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
-	ss_debug("pick_next_task_ss hooked");
-	return (get_earliest_ss_task(&rq->ss_rq))->task;
+	struct ss_task *retval = get_earliest_ss_task(&rq->ss_rq);
+	if(!retval){
+		return NULL;
+	}
+	return retval;
 }
