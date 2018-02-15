@@ -1,4 +1,5 @@
 #include <linux/rbtree.h>
+#include "ss_debug.h"
 #include "sched.h"
 #include "ss.h"
 /*
@@ -13,6 +14,7 @@ extern int ss_utill_task_is_dead(struct ss_task *ss_task){
 
 
 }
+SS_EXPORT_IF_DEBUG(ss_utill_task_is_dead);
 /*
 struct ss_task *find_ss_task (struct ss_rq *ss_rq,struct task_struct *p)
 @brief Search and return the ss_task struct of the task_struct * given on runqueue given
@@ -36,6 +38,7 @@ extern struct ss_task *find_ss_task(struct ss_rq *ss_rq,struct task_struct *p){
 	return NULL;
 
 }
+SS_EXPORT_IF_DEBUG(find_ss_task);
 /*
 struct ss_task *get_earliest_ss_task(struct ss_rq*)
 [t]
@@ -65,7 +68,7 @@ version_before  version_after           brief                   solution        
 								insert an flags param
 
 */
-
+SS_EXPORT_IF_DEBUG(get_earliest_ss_task);
 extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task,int flags){
 	struct rb_node * temp  = ss_rq->ss_root.rb_node ;	//At first , temp node starts from root node!
 	struct rb_node * parent= NULL;				//..and of course , has no parent :P
@@ -90,7 +93,7 @@ extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task,int
 	}
 	return 1;
 }
-
+SS_EXPORT_IF_DEBUG(insert_ss_task_rb_tree);
 /*
 int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task *ss_task)
 @brief removes a task from red-black tree :O
@@ -103,3 +106,4 @@ extern int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task*ss_task){
 	return 1;
 
 }
+SS_EXPORT_IF_DEBUG(remove_ss_task_rb_tree);
