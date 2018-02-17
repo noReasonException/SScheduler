@@ -3447,7 +3447,6 @@ recheck:
 			    !can_nice(p, attr->sched_nice))
 				return -EPERM;
 		}
-
 		if (rt_policy(policy)) {
 			unsigned long rlim_rtprio =
 					task_rlimit(p, RLIMIT_RTPRIO);
@@ -3632,6 +3631,15 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		.sched_priority = param->sched_priority,
 		.sched_nice	= PRIO_TO_NICE(p->static_prio),
 	};
+	 /*TODO : ss_sched_attr_init() routine
+                TODO : call insert to rq list routine*/
+                #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+                if(ss_policy(policy)){
+                        attr.ss_id=0;
+                        attr.deadline=0;
+
+                }
+                #endif
 
 	/* Fixup the legacy SCHED_RESET_ON_FORK hack. */
 	if ((policy != SETPARAM_POLICY) && (policy & SCHED_RESET_ON_FORK)) {
