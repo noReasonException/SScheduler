@@ -67,6 +67,8 @@ static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 			printk(KERN_CRIT"ss:new task submitted");		//debug purposes...
 		}
 	}
+	ss_debug("enqueue_task_ss invoked on rq:%pK and task_struct :%pK",rq,p);
+
 }
 SS_EXPORT_IF_DEBUG(enqueue_task_ss);
 /*
@@ -89,6 +91,7 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 			}*/
 		}
 	}
+	ss_debug("dequeue_task_ss invoked on rq:%pK and task_struct :%pK",rq,p);
 }
 SS_EXPORT_IF_DEBUG(dequeue_task_ss);
 /*check_preempt_curr_ss
@@ -107,6 +110,10 @@ version_before	version_after		brief			solution		status
 								with resched_curr
 								(introduced to patch
 								4443611 v3.16.x)
+0.0.3		0.0.4			readabillity fix	replace  *task		TODO
+								with  *p so to be
+								the same as other
+								routines
 */
 static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task,int flags ){
 	struct ss_task *earl_task	=NULL; //The leftmost node of red-black tree(a.k.a earliest deadline)
@@ -124,6 +131,8 @@ static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task,int fl
 			}
 		}
 	}
+	ss_debug("check_preempt_task_ss invoked on rq:%pK and task_struct :%pK",rq,task);
+
 }
 SS_EXPORT_IF_DEBUG(check_preempt_curr_ss);
 /*pick_next_task_ss
@@ -132,12 +141,13 @@ SS_EXPORT_IF_DEBUG(check_preempt_curr_ss);
 @param struct rq *rq , The current runqueue
 Revisions
 version_before  version_after           brief                   solution                status
-0.0.1           0.0.2                   compatibility issue    	task_struct *ptr in	Fixed
+0.0.1  	        0.0.2                   compatibility issue    	task_struct *ptr in	Fixed
 								param list (introduced
                                                                 in 3.15-rc1)
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
 	struct ss_task *retval = get_earliest_ss_task(&rq->ss_rq);
+	
 	if(!retval){
 		return NULL;
 	}

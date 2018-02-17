@@ -11,7 +11,7 @@ enjoy!
 #define SS_DEBUG_MODE 1
 #ifdef SS_DEBUG_MODE
 	#define ss_debug_lvl KERN_CRIT
-	#define ss_debug(...) printk(ss_debug_lvl"ss: " __VA_ARGS__ )
+	#define ss_debug(...) printk(ss_debug_lvl"ss_log: " __VA_ARGS__ )
 	#define SS_EXPORT_IF_DEBUG(symbol) EXPORT_SYMBOL(symbol)
 #else
 	#define ss_debug_lvl

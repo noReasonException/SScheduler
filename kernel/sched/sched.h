@@ -76,6 +76,11 @@ extern void update_cpu_load_active(struct rq *this_rq);
  */
 #define RUNTIME_INF	((u64)~0ULL)
 
+#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+static inline int ss_policy(int policy){
+	return policy==SCHED_SS;
+}
+#endif
 static inline int fair_policy(int policy)
 {
 	return policy == SCHED_NORMAL || policy == SCHED_BATCH;

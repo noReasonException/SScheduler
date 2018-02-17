@@ -84,6 +84,7 @@
 #endif
 
 #include "sched.h"
+#include "ss_debug.h"
 #include "../workqueue_internal.h"
 #include "../smpboot.h"
 
@@ -3291,6 +3292,14 @@ static void __setscheduler(struct rq *rq, struct task_struct *p,
 	 * If we get here, there was no pi waiters boosting the
 	 * task. It is safe to use the normal prio.
 	 */
+
+	#ifdef  CONFIG_SCHED_STEF_POLICY_CONFIG
+	if(ss_policy(attr->sched_policy)){
+		ss_debug("__setscheduler assign ss_sched_class on rq:%pK in task:%pK",rq,p);
+		p->sched_class=&ss_sched_class;
+		return;
+	}
+	#endif
 	p->prio = normal_prio(p);
 
 	if (dl_prio(p->prio))
