@@ -21,3 +21,9 @@ extern void init_ss_rq(struct ss_rq * ss_rq,int cpu_id){
 }
 SS_EXPORT_IF_DEBUG(init_ss_rq);
 /**/
+
+extern void init_ss_sched_attr(struct sched_attr*attr){
+	attr->deadline=0;
+	ss_debug("init_ss_sched_attr initialized struct on %pK",attr);
+
+}

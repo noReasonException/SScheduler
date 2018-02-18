@@ -107,3 +107,14 @@ extern int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task*ss_task){
 
 }
 SS_EXPORT_IF_DEBUG(remove_ss_task_rb_tree);
+
+/**/
+extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task){
+	return 0;//NO_IMPLEMENTED
+}
+/**/
+extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task){ 
+        return 0;//NO_IMPLEMENTED
+}
+
+

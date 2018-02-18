@@ -2,11 +2,13 @@
 #include "ss_debug.h"
 #include "ss.h"
 extern void resched_curr(struct rq *rq); //forward declaration
-/*[t]*/extern struct ss_task * find_ss_task		(struct ss_rq *,struct task_struct *);
+/*[t]*/extern struct ss_task * 	find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/extern int		ss_utill_task_is_dead	(struct task_struct *p);
-/*[t]*/extern struct ss_task * get_earliest_ss_task	(struct ss_rq*);
+/*[t]*/extern struct ss_task * 	get_earliest_ss_task	(struct ss_rq*);
 /*[t]*/extern int		insert_ss_task_rb_tree 	(struct ss_rq*,struct ss_task*,int flags);
 /*[t]*/extern int 		remove_ss_task_rb_tree	(struct ss_rq*,struct ss_task*);
+/*[c]*/extern int 		remove_ss_task_rq_list	(struct ss_rq*ss_rq,struct ss_task*ss_task);
+/*[c]*/extern int 		insert_ss_task_rq_list	(struct ss_rq*ss_rq,struct task_struct*ss_task);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException
@@ -87,7 +89,7 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 			remove_ss_task_rb_tree(&rq->ss_rq,t);
 			atomic_dec(&rq->ss_rq.nr_running);
 			/*if(ss_utill_task_is_dead(p)){
-				rem_ss_task_list(&rq->ss_rq,t->task); //TODO:Dont forget to implement
+				remove_ss_task_rq_list(&rq->ss_rq,t); //TODO:Dont forget to implement
 			}*/
 		}
 	}

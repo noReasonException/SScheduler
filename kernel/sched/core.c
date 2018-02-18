@@ -92,7 +92,8 @@
 #include <trace/events/sched.h>
 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
 struct ss_rq;
-extern void init_ss_rq(struct ss_rq *,int i);//forward declaration of initialization of each runqueue function
+extern void init_ss_rq		(struct ss_rq *,int i);//forward declaration of initialization of each runqueue function
+extern void init_ss_sched_attr	(struct sched_attr*);
 #endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 {
@@ -3493,7 +3494,6 @@ recheck:
 		if (retval)
 			return retval;
 	}
-
 	/*
 	 * make sure no PI-waiters arrive (or leave) while we are
 	 * changing the priority of the task:
@@ -3502,6 +3502,13 @@ recheck:
 	 * runqueue lock must be held.
 	 */
 	rq = task_rq_lock(p, &flags);
+
+	/*in case of ss_policy , then this task must be added to ss_rq list , so the pick_next_task_ss detect it and schedules it!*/
+	#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
+		if(ss_policy(policy)){
+			insert_ss_task_rq_list(&rq->ss_rq,p);
+		}
+	#endif
 
 	/*
 	 * Changing the policy of the stop threads its a very bad idea
@@ -3634,11 +3641,7 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 	 /*TODO : ss_sched_attr_init() routine
                 TODO : call insert to rq list routine*/
                 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-                if(ss_policy(policy)){
-                        attr.ss_id=0;
-                        attr.deadline=0;
-
-                }
+                if(ss_policy(policy)) init_ss_sched_attr(&attr);
                 #endif
 
 	/* Fixup the legacy SCHED_RESET_ON_FORK hack. */
