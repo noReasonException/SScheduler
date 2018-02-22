@@ -111,20 +111,28 @@ extern int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task*ss_task){
 }
 SS_EXPORT_IF_DEBUG(remove_ss_task_rb_tree);
 
-/**/
+/*
+extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task)
+removes an ss_task from runqueue
+@returns	1)0 in success
+		2)EINVAL if this ss_task not belong to this runqueue
+*/
 extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task){
-	return 0;//NO_IMPLEMENTED
+	return ENOSYS;//NO_IMPLEMENTED
 }
 /*
 insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct *ss_task)
 adds a new task_struct into runqueue
-@Note : Be careful , this routine put the task in runqueue , no in rbtree! */
+@Note : Be careful , this routine put the task in runqueue , no in rbtree!
+@returns 	1)0 in success
+		2)ENOMEM if alloc_ss_task returns NULL (cause of NULL in kmalloc() )*/
+
 extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task){
 	ss_debug("task:%pK on runqueue:%pK requested to schedule with sscheduler",ss_task,ss_rq);
 	struct ss_task *ptr = alloc_ss_task(ss_task);
-	if(!ptr)return NULL;
+	if(!ptr)return ENOMEM;
 	list_add(ptr,&ss_rq->ss_list);
-        return 1;
+        return 0;
 }
 
 
