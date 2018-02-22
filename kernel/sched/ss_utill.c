@@ -1,4 +1,5 @@
 #include <linux/rbtree.h>
+#include <linux/list.h>
 #include "ss_debug.h"
 #include "sched.h"
 #include "ss.h"
@@ -7,6 +8,7 @@ extern struct ss_task*alloc_ss_task(struct task_struct *p); // @see ss_init.c
 
 /*
 ss_utill_task_is_dead(struct ss_task *ss_task)
+[t]
 returns 1 if task must remove from linked list of tasks , 0 if not
 @param ss_task the ss_task of the task to examine  @see sched.h/struct ss_task
 */
@@ -20,6 +22,7 @@ extern int ss_utill_task_is_dead(struct ss_task *ss_task){
 SS_EXPORT_IF_DEBUG(ss_utill_task_is_dead);
 /*
 struct ss_task *find_ss_task (struct ss_rq *ss_rq,struct task_struct *p)
+[t]
 @brief Search and return the ss_task struct of the task_struct * given on runqueue given
 @note  Just iterate over ss_rq->ss_list(i) , if if(i->task==p) return p , otherwise return NULL (meaning that the
 task_struct given has not STEF_SCHED policy! :))
@@ -57,8 +60,9 @@ extern struct ss_task *get_earliest_ss_task(struct ss_rq*ss_rq){
 }
 /*
 int insert_ss_task_rb_tree(struct ss_rq*,struct ss_task*)
+[t]
 @version 0.0.2
-@brief Imports a new task into sscheduler's red-black tree!
+Imports a new task into sscheduler's red-black tree!
 @param struct ss_rq  * ss_rq   -> The current runqueue
 @param struct ss_task* ss_task -> The process to insert in rbtree!
 @returns >1 if all okay , 0 otherwise
@@ -99,7 +103,8 @@ extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task,int
 SS_EXPORT_IF_DEBUG(insert_ss_task_rb_tree);
 /*
 int remove_ss_task_rb_tree(struct ss_rq*ss_rq,struct ss_task *ss_task)
-@brief removes a task from red-black tree :O
+[t]
+Removes a task from red-black tree :O
 @param struct ss_rq  *ss_rq , the current runqueue
 @param struct ss_task*ss_task ,the process to remove from red-black tree
 @return 1 on success , 0 otherwise
@@ -113,16 +118,32 @@ SS_EXPORT_IF_DEBUG(remove_ss_task_rb_tree);
 
 /*
 extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task)
+[t]
 removes an ss_task from runqueue
+@param 		ss_rq 		the current runqueue
+@param		ss_task		the task to remove
 @returns	1)0 in success
 		2)EINVAL if this ss_task not belong to this runqueue
+TODO:refactor so to use find_ss_task instead of looping (the @param ss_task must changed to task_struct)
 */
 extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task){
-	return ENOSYS;//NO_IMPLEMENTED
+	struct list_head *tmp;
+	struct ss_task	 *cursor=NULL;
+	list_for_each(tmp,&ss_rq->ss_list){
+		cursor=list_entry(tmp,struct ss_task,ss_list);
+		if(cursor==ss_task){
+			list_del(ss_task->ss_list_node);
+			return 0;
+		}
+	}
+	return EINVAL;
 }
 /*
 insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct *ss_task)
+[t]
 adds a new task_struct into runqueue
+@param 		ss_rq 	 	the current runqueue
+@param		ss_task		the task to add in current runqueue
 @Note : Be careful , this routine put the task in runqueue , no in rbtree!
 @returns 	1)0 in success
 		2)ENOMEM if alloc_ss_task returns NULL (cause of NULL in kmalloc() )*/
