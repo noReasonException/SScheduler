@@ -20,13 +20,19 @@ extern void init_ss_rq(struct ss_rq * ss_rq,int cpu_id){
 	ss_debug("ss runqueue initialized  %d",cpu_id);
 }
 SS_EXPORT_IF_DEBUG(init_ss_rq);
-/**/
+/*
+extern void init_ss_sched_attr(struct sched_attr *attr)
+initializes the fields of sscheduler in struct sched_attr
+called by _sched_setscheduler(struct task_struct *p) in /kernel/sched/core.c
+TODO:ss_id maybe? :P
+*/
 
 extern void init_ss_sched_attr(struct sched_attr*attr){
 	attr->deadline=0;
 	ss_debug("init_ss_sched_attr initialized struct on %pK",attr);
 
 }
+SS_EXPORT_IF_DEBUG(init_ss_sched_attr);
 /*
 extern struct ss_task *alloc_ss_task(struct task_struct *p)
 Allocates a ss_task and initialized properly
@@ -35,10 +41,11 @@ Allocates a ss_task and initialized properly
 @Note , the @param p is not checked , if you pass invalid pointer , then...Oops! , or maybe PANIC(not at the disco :P)*/
 extern struct ss_task* alloc_ss_task(struct task_struct *p){
 	struct ss_task *retval=kmalloc(sizeof(struct ss_task),GFP_KERNEL);
-	retval->ss_node=RB_ROOT;
+//	retval->ss_node=RB_ROOT;
 	retval->absolute_deadline=0;
 	INIT_LIST_HEAD(&retval->ss_list_node);
 	retval->task=p;
 	ss_debug("alloc_ss_task created task on %pK",p);
 	return retval;
 }
+SS_EXPORT_IF_DEBUG(alloc_ss_task);
