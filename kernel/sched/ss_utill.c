@@ -2,6 +2,9 @@
 #include "ss_debug.h"
 #include "sched.h"
 #include "ss.h"
+
+extern struct ss_task*alloc_ss_task(struct task_struct *p); // @see ss_init.c
+
 /*
 ss_utill_task_is_dead(struct ss_task *ss_task)
 returns 1 if task must remove from linked list of tasks , 0 if not
@@ -119,6 +122,7 @@ adds a new task_struct into runqueue
 extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task){
 	ss_debug("task:%pK on runqueue:%pK requested to schedule with sscheduler",ss_task,ss_rq);
 	struct ss_task *ptr = alloc_ss_task(ss_task);
+	if(!ptr)return NULL;
 	list_add(ptr,&ss_rq->ss_list);
         return 1;
 }

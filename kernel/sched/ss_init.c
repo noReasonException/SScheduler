@@ -38,9 +38,13 @@ extern struct ss_task *alloc_ss_task(struct task_struct *p)
 Allocates a ss_task and initialized properly
 @Note , you must manually call list_add to add it in your runqueue!
 @param p , the task_struct whitch ss_task->task will point to
-@Note , the @param p is not checked , if you pass invalid pointer , then...Oops! , or maybe PANIC(not at the disco :P)*/
+@Note , the @param p is not checked , if you pass invalid pointer , then...Oops! , or maybe PANIC(not at the disco :P)
+@Nullable*/
 extern struct ss_task* alloc_ss_task(struct task_struct *p){
-	struct ss_task *retval=kmalloc(sizeof(struct ss_task),GFP_KERNEL);
+	struct ss_task *retval;
+	if(!(retval=kmalloc(sizeof(struct ss_task),GFP_KERNEL))){
+		return NULL;
+	}
 //	retval->ss_node=RB_ROOT;
 	retval->absolute_deadline=0;
 	INIT_LIST_HEAD(&retval->ss_list_node);
