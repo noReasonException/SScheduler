@@ -112,10 +112,15 @@ SS_EXPORT_IF_DEBUG(remove_ss_task_rb_tree);
 extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task){
 	return 0;//NO_IMPLEMENTED
 }
-/**/
-extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task){ 
+/*
+insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct *ss_task)
+adds a new task_struct into runqueue
+@Note : Be careful , this routine put the task in runqueue , no in rbtree! */
+extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task){
 	ss_debug("task:%pK on runqueue:%pK requested to schedule with sscheduler",ss_task,ss_rq);
-        return 0;
+	struct ss_task *ptr = alloc_ss_task(ss_task);
+	list_add(ptr,&ss_rq->ss_list);
+        return 1;
 }
 
 
