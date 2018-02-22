@@ -130,9 +130,9 @@ extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task){
 	struct list_head *tmp;
 	struct ss_task	 *cursor=NULL;
 	list_for_each(tmp,&ss_rq->ss_list){
-		cursor=list_entry(tmp,struct ss_task,ss_list);
+		cursor=list_entry(tmp,struct ss_task,ss_list_node);
 		if(cursor==ss_task){
-			list_del(ss_task->ss_list_node);
+			list_del(&ss_task->ss_list_node);
 			return 0;
 		}
 	}
@@ -152,7 +152,7 @@ extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task)
 	ss_debug("task:%pK on runqueue:%pK requested to schedule with sscheduler",ss_task,ss_rq);
 	struct ss_task *ptr = alloc_ss_task(ss_task);
 	if(!ptr)return ENOMEM;
-	list_add(ptr,&ss_rq->ss_list);
+	list_add(&ptr->ss_list_node,&ss_rq->ss_list);
         return 0;
 }
 
