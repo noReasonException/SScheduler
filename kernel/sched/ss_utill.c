@@ -114,7 +114,8 @@ extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task){
 }
 /**/
 extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task){ 
-        return 0;//NO_IMPLEMENTED
+	ss_debug("task:%pK on runqueue:%pK requested to schedule with sscheduler",ss_task,ss_rq);
+        return 0;
 }
 
 

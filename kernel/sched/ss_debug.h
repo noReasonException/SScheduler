@@ -18,3 +18,4 @@ enjoy!
 	#define ss_debug(...)
 	#define SS_EXPORT_IF_DEBUG(symbol)
 #endif
+#define temp_debug(...) ss_debug(__VA_ARGS__)

@@ -84,16 +84,17 @@
 #endif
 
 #include "sched.h"
-#include "ss_debug.h"
 #include "../workqueue_internal.h"
 #include "../smpboot.h"
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+#include "ss_debug.h"
 struct ss_rq;
-extern void init_ss_rq		(struct ss_rq *,int i);//forward declaration of initialization of each runqueue function
-extern void init_ss_sched_attr	(struct sched_attr*);
+extern void init_ss_rq		  (struct ss_rq *,int i);				//@see ss_init.c
+extern void init_ss_sched_attr	  (struct sched_attr*);					//@see ss_init.c
+extern int  insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task);	//@see ss_utill.c
 #endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 {
@@ -3410,6 +3411,7 @@ static int __sched_setscheduler(struct task_struct *p,
 	/* may grab non-irq protected spin_locks */
 	BUG_ON(in_interrupt());
 recheck:
+	temp_debug(KERN_CRIT"__sched_setscheduler , policy check start...");
 	/* double check policy once rq lock held */
 	if (policy < 0) {
 		reset_on_fork = p->sched_reset_on_fork;
@@ -3418,9 +3420,17 @@ recheck:
 		reset_on_fork = !!(attr->sched_flags & SCHED_FLAG_RESET_ON_FORK);
 
 		if (policy != SCHED_DEADLINE &&
+				/*
+					In case of CONFIG_SCHED_STEF_POLICY_CONFIG , every task will have as its policy the SCHED_SS
+					we check it , otherwise will throw -EINVAL !!! :O
+				*/
+				#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+					policy!=SCHED_SS&&
+				#endif
 				policy != SCHED_FIFO && policy != SCHED_RR &&
 				policy != SCHED_NORMAL && policy != SCHED_BATCH &&
 				policy != SCHED_IDLE)
+				temp_debug(KERN_CRIT"EINVAL : Invalid policy %d",policy);
 			return -EINVAL;
 	}
 
@@ -3504,6 +3514,7 @@ recheck:
 	rq = task_rq_lock(p, &flags);
 
 	/*in case of ss_policy , then this task must be added to ss_rq list , so the pick_next_task_ss detect it and schedules it!*/
+	temp_debug("__sched_setscheduler policy complete , outside insert arrived");
 	#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(ss_policy(policy)){
 			insert_ss_task_rq_list(&rq->ss_rq,p);
@@ -3650,8 +3661,9 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		policy &= ~SCHED_RESET_ON_FORK;
 		attr.sched_policy = policy;
 	}
-
-	return __sched_setscheduler(p, &attr, check);
+	int tmp=__sched_setscheduler(p, &attr, check);
+	temp_debug("%d as tmp value",tmp);
+	return tmp;
 }
 /**
  * sched_setscheduler - change the scheduling policy and/or RT priority of a thread.
