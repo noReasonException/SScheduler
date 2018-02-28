@@ -3411,7 +3411,6 @@ static int __sched_setscheduler(struct task_struct *p,
 	/* may grab non-irq protected spin_locks */
 	BUG_ON(in_interrupt());
 recheck:
-	temp_debug(KERN_CRIT"__sched_setscheduler , policy check start...");
 	/* double check policy once rq lock held */
 	if (policy < 0) {
 		reset_on_fork = p->sched_reset_on_fork;
@@ -3430,7 +3429,6 @@ recheck:
 				policy != SCHED_FIFO && policy != SCHED_RR &&
 				policy != SCHED_NORMAL && policy != SCHED_BATCH &&
 				policy != SCHED_IDLE)
-				temp_debug(KERN_CRIT"EINVAL : Invalid policy %d",policy);
 			return -EINVAL;
 	}
 
@@ -3514,10 +3512,11 @@ recheck:
 	rq = task_rq_lock(p, &flags);
 
 	/*in case of ss_policy , then this task must be added to ss_rq list , so the pick_next_task_ss detect it and schedules it!*/
-	temp_debug("__sched_setscheduler policy complete , outside insert arrived");
 	#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(ss_policy(policy)){
-			insert_ss_task_rq_list(&rq->ss_rq,p);
+			insert_ss_task_rq_list(&rq->ss_rq,p); 		//insert task on sscheduler runqueue
+			task_rq_unlock(rq,p,&flags);			//release runqueue lock
+			return 0;					//success!
 		}
 	#endif
 
@@ -3661,9 +3660,7 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		policy &= ~SCHED_RESET_ON_FORK;
 		attr.sched_policy = policy;
 	}
-	int tmp=__sched_setscheduler(p, &attr, check);
-	temp_debug("%d as tmp value",tmp);
-	return tmp;
+	return __sched_setscheduler(p, &attr, check);
 }
 /**
  * sched_setscheduler - change the scheduling policy and/or RT priority of a thread.
