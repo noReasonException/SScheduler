@@ -149,7 +149,7 @@ adds a new task_struct into runqueue
 		2)ENOMEM if alloc_ss_task returns NULL (cause of NULL in kmalloc() )*/
 
 extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task){
-	ss_debug("task:%pK on runqueue:%pK requested to schedule with sscheduler",ss_task,ss_rq);
+	ss_debug("task:%px on runqueue:%px requested to schedule with sscheduler",ss_task,ss_rq);
 	struct ss_task *ptr = alloc_ss_task(ss_task);
 	if(!ptr)return ENOMEM;
 	list_add(&ptr->ss_list_node,&ss_rq->ss_list);

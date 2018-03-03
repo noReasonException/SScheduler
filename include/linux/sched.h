@@ -8,6 +8,9 @@
 
 struct sched_param {
 	int sched_priority;
+	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+		unsigned long deadline;
+	#endif
 };
 
 #include <asm/param.h>	/* for HZ */
@@ -127,7 +130,7 @@ struct sched_attr {
 	ss_id is a dump number
 	the real interest is the deadline , witch is the relative deadline , we use it to calculate absolute deadline :)*/
 	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-		unsigned long long deadline;
+		unsigned long deadline;
 	#endif
 };
 

@@ -29,7 +29,7 @@ TODO:ss_id maybe? :P
 
 extern void init_ss_sched_attr(struct sched_attr*attr){
 	attr->deadline=0;
-	ss_debug("init_ss_sched_attr initialized struct on %pK",attr);
+	ss_debug("init_ss_sched_attr initialized struct on %px",attr);
 
 }
 SS_EXPORT_IF_DEBUG(init_ss_sched_attr);
@@ -49,7 +49,7 @@ extern struct ss_task* alloc_ss_task(struct task_struct *p){
 	retval->absolute_deadline=0;
 	INIT_LIST_HEAD(&retval->ss_list_node);
 	retval->task=p;
-	ss_debug("alloc_ss_task created task on %pK",p);
+	ss_debug("alloc_ss_task created task on %px",p);
 	return retval;
 }
 SS_EXPORT_IF_DEBUG(alloc_ss_task);

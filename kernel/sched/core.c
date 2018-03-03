@@ -3297,7 +3297,7 @@ static void __setscheduler(struct rq *rq, struct task_struct *p,
 
 	#ifdef  CONFIG_SCHED_STEF_POLICY_CONFIG
 	if(ss_policy(attr->sched_policy)){
-		ss_debug("__setscheduler assign ss_sched_class on rq:%pK in task:%pK",rq,p);
+		ss_debug("__setscheduler assign ss_sched_class on rq:%px in task:%px",rq,p);
 		p->sched_class=&ss_sched_class;
 		return;
 	}
@@ -3431,10 +3431,8 @@ recheck:
 				policy != SCHED_IDLE)
 			return -EINVAL;
 	}
-
 	if (attr->sched_flags & ~(SCHED_FLAG_RESET_ON_FORK))
 		return -EINVAL;
-
 	/*
 	 * Valid priorities for SCHED_FIFO and SCHED_RR are
 	 * 1..MAX_USER_RT_PRIO-1, valid priority for SCHED_NORMAL,
@@ -3446,7 +3444,6 @@ recheck:
 	if ((dl_policy(policy) && !__checkparam_dl(attr)) ||
 	    (rt_policy(policy) != (attr->sched_priority != 0)))
 		return -EINVAL;
-
 	/*
 	 * Allow unprivileged RT tasks to decrease priority:
 	 */
@@ -3511,12 +3508,15 @@ recheck:
 	 */
 	rq = task_rq_lock(p, &flags);
 
+	temp_debug("Before ss");
 	/*in case of ss_policy , then this task must be added to ss_rq list , so the pick_next_task_ss detect it and schedules it!*/
 	#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(ss_policy(policy)){
+			temp_debug("insert ss_task_rq_list on %px",p);
 			insert_ss_task_rq_list(&rq->ss_rq,p); 		//insert task on sscheduler runqueue
-			task_rq_unlock(rq,p,&flags);			//release runqueue lock
-			return 0;					//success!
+			goto change;
+//			task_rq_unlock(rq,p,&flags);			//release runqueue lock
+//			return 0;					//success!
 		}
 	#endif
 
@@ -3648,8 +3648,6 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		.sched_priority = param->sched_priority,
 		.sched_nice	= PRIO_TO_NICE(p->static_prio),
 	};
-	 /*TODO : ss_sched_attr_init() routine
-                TODO : call insert to rq list routine*/
                 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
                 if(ss_policy(policy)) init_ss_sched_attr(&attr);
                 #endif
@@ -3660,7 +3658,9 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		policy &= ~SCHED_RESET_ON_FORK;
 		attr.sched_policy = policy;
 	}
-	return __sched_setscheduler(p, &attr, check);
+	int ret=__sched_setscheduler(p, &attr, check);
+	temp_debug("%d on return of __sched_setscheduler ",ret);
+	return ret;
 }
 /**
  * sched_setscheduler - change the scheduling policy and/or RT priority of a thread.
