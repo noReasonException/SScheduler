@@ -90,12 +90,12 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-#include "ss_debug.h"
-struct ss_rq;
-extern void init_ss_rq		  (struct ss_rq *,int i);				//@see ss_init.c
-extern void init_ss_sched_attr	  (struct sched_attr*,const struct sched_param*);	//@see ss_init.c
-extern int  insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task);	//@see ss_utill.c
-extern int  ss_prio		  (int prio);						//@see ss_init.c
+	#include "ss_debug.h"
+	struct ss_rq;
+	extern void init_ss_rq		  (struct ss_rq *,int i);							//@see ss_init.c
+	extern void init_ss_sched_attr	  (struct sched_attr*,const struct sched_param*);				//@see ss_init.c
+	extern int  insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task,const struct sched_attr*attr);	//@see ss_utill.c
+	extern int  ss_prio		  (int prio);									//@see ss_init.c
 #endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 {
@@ -3533,7 +3533,7 @@ recheck:
 	#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(ss_policy(policy)){
 			temp_debug("insert ss_task_rq_list on %px",p);
-			insert_ss_task_rq_list(&rq->ss_rq,p); 		//insert task on sscheduler runqueue
+			insert_ss_task_rq_list(&rq->ss_rq,p,attr); 	//insert task on sscheduler runqueue
 			task_rq_unlock(rq,p,&flags);			//release runqueue lock
 			return 0;					//success!
 		}
