@@ -93,7 +93,7 @@
 #include "ss_debug.h"
 struct ss_rq;
 extern void init_ss_rq		  (struct ss_rq *,int i);				//@see ss_init.c
-extern void init_ss_sched_attr	  (struct sched_attr*);					//@see ss_init.c
+extern void init_ss_sched_attr	  (struct sched_attr*,const struct sched_param*);	//@see ss_init.c
 extern int  insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task);	//@see ss_utill.c
 #endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
@@ -3508,15 +3508,13 @@ recheck:
 	 */
 	rq = task_rq_lock(p, &flags);
 
-	temp_debug("Before ss");
 	/*in case of ss_policy , then this task must be added to ss_rq list , so the pick_next_task_ss detect it and schedules it!*/
 	#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(ss_policy(policy)){
 			temp_debug("insert ss_task_rq_list on %px",p);
 			insert_ss_task_rq_list(&rq->ss_rq,p); 		//insert task on sscheduler runqueue
-			goto change;
-//			task_rq_unlock(rq,p,&flags);			//release runqueue lock
-//			return 0;					//success!
+			task_rq_unlock(rq,p,&flags);			//release runqueue lock
+			return 0;					//success!
 		}
 	#endif
 
@@ -3649,7 +3647,7 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		.sched_nice	= PRIO_TO_NICE(p->static_prio),
 	};
                 #ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-                if(ss_policy(policy)) init_ss_sched_attr(&attr);
+	                if(ss_policy(policy)) init_ss_sched_attr(&attr,param);
                 #endif
 
 	/* Fixup the legacy SCHED_RESET_ON_FORK hack. */
@@ -3658,9 +3656,7 @@ static int _sched_setscheduler(struct task_struct *p, int policy,
 		policy &= ~SCHED_RESET_ON_FORK;
 		attr.sched_policy = policy;
 	}
-	int ret=__sched_setscheduler(p, &attr, check);
-	temp_debug("%d on return of __sched_setscheduler ",ret);
-	return ret;
+	return __sched_setscheduler(p, &attr, check);
 }
 /**
  * sched_setscheduler - change the scheduling policy and/or RT priority of a thread.

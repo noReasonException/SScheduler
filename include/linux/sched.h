@@ -8,9 +8,6 @@
 
 struct sched_param {
 	int sched_priority;
-	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-		unsigned long deadline;
-	#endif
 };
 
 #include <asm/param.h>	/* for HZ */
