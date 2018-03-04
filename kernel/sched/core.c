@@ -3446,6 +3446,10 @@ recheck:
 		}
 	#endif
 	temp_debug("check mm");
+
+	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+		if(!ss_policy(policy)){
+	#endif
 	/*
 	 * Valid priorities for SCHED_FIFO and SCHED_RR are
 	 * 1..MAX_USER_RT_PRIO-1, valid priority for SCHED_NORMAL,
@@ -3457,6 +3461,9 @@ recheck:
 	if ((dl_policy(policy) && !__checkparam_dl(attr)) ||
 	    (rt_policy(policy) != (attr->sched_priority != 0)))
 		return -EINVAL;
+	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+		}
+	#endif
 	/*
 	 * Allow unprivileged RT tasks to decrease priority:
 	 */
