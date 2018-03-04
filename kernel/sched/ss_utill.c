@@ -1,7 +1,8 @@
-#include <linux/rbtree.h>
-#include <linux/list.h>
-#include "ss_debug.h"
-#include "sched.h"
+#include <linux/sched/prio.h> 				//we need MAX_PRIO macro
+#include <linux/rbtree.h>				//we need rb-trees to get the earliest deadline task!
+#include <linux/list.h>					//we need lists to keep the running tasks inside ss_rq
+#include "ss_debug.h"					//debug macros , example -> ss_debug(...)
+#include "sched.h"					//we definetely need ss_task and ss_rq definitions , right?
 #include "ss.h"
 
 extern struct ss_task*alloc_ss_task(struct task_struct *p); // @see ss_init.c
@@ -154,6 +155,20 @@ extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task)
 	if(!ptr)return ENOMEM;
 	list_add(&ptr->ss_list_node,&ss_rq->ss_list);
         return 0;
+}
+/*
+extern int ss_prio(int prio)
+checks if the given prio belongs to sscheduler
+@param prio , the priority to check!
+@Note : The priority of sscheduler , is the deadline of the task . because we cant
+touch sched_param struct due to ABI compatibillity with user space compiled programms ,
+we use sched_param->sched_priority as deadline.
+We know that every task (except ss_tasks) have at most MAX_PRIO priority . so
+we use the numbers above MAX_PRIO as deadline
+The actual deadline of a ss_task with priority X is ...
+				deadline(X)=X-MAX_PRIO*/
+extern int ss_prio(int prio){
+	return prio>MAX_PRIO;
 }
 
 

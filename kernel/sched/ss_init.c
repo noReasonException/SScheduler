@@ -28,8 +28,8 @@ TODO:ss_id maybe? :P
 */
 
 extern void init_ss_sched_attr(struct sched_attr*attr,const struct sched_param*param){
-	attr->deadline=0;
-	ss_debug("init_ss_sched_attr initialized struct on %px ",attr);
+	attr->deadline=param->sched_priority;
+	ss_debug("init_ss_sched_attr initialized struct on %px with deadline %d ",attr,attr->deadline);
 
 }
 SS_EXPORT_IF_DEBUG(init_ss_sched_attr);
