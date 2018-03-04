@@ -3,6 +3,7 @@
 #include <asm/atomic.h>
 #include "ss_debug.h"
 
+extern int ss_prio(int prio);
 /*
 
 *)static void init_ss_rq(struct ss_rq**)

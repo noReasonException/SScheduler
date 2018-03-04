@@ -127,7 +127,7 @@ struct sched_attr {
 	ss_id is a dump number
 	the real interest is the deadline , witch is the relative deadline , we use it to calculate absolute deadline :)*/
 	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
-		unsigned long deadline;
+		int deadline;
 	#endif
 };
 

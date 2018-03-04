@@ -95,6 +95,7 @@ struct ss_rq;
 extern void init_ss_rq		  (struct ss_rq *,int i);				//@see ss_init.c
 extern void init_ss_sched_attr	  (struct sched_attr*,const struct sched_param*);	//@see ss_init.c
 extern int  insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task);	//@see ss_utill.c
+extern int  ss_prio		  (int prio);						//@see ss_init.c
 #endif
 void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 {
@@ -3433,6 +3434,14 @@ recheck:
 	}
 	if (attr->sched_flags & ~(SCHED_FLAG_RESET_ON_FORK))
 		return -EINVAL;
+
+	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
+		if(ss_policy(policy)&&!ss_prio(attr->deadline)){
+			ss_debug("invalid ss policy , -EINVAL");
+			return -EINVAL;
+		}
+		ss_debug("valid ss_policy , proceed");
+	#endif
 	/*
 	 * Valid priorities for SCHED_FIFO and SCHED_RR are
 	 * 1..MAX_USER_RT_PRIO-1, valid priority for SCHED_NORMAL,
@@ -3711,7 +3720,6 @@ do_sched_setscheduler(pid_t pid, int policy, struct sched_param __user *param)
 		return -EINVAL;
 	if (copy_from_user(&lparam, param, sizeof(struct sched_param)))
 		return -EFAULT;
-
 	rcu_read_lock();
 	retval = -ESRCH;
 	p = find_process_by_pid(pid);
