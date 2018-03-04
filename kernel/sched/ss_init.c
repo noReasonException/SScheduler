@@ -1,8 +1,9 @@
-#include "sched.h" //to reference struct ss_rq on that file
+
 #include <linux/rbtree.h>
 #include <asm/atomic.h>
 #include "ss_debug.h"
-
+#include "sched.h"
+#include "ss.h"
 extern int ss_prio(int prio);
 /*
 
@@ -29,7 +30,7 @@ TODO:ss_id maybe? :P
 */
 
 extern void init_ss_sched_attr(struct sched_attr*attr,const struct sched_param*param){
-	attr->deadline=param->sched_priority;
+	attr->deadline=PRIO_TO_SS_DEADLINE(param->sched_priority);
 	ss_debug("init_ss_sched_attr initialized struct on %px with deadline %d ",attr,attr->deadline);
 
 }

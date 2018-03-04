@@ -3434,14 +3434,18 @@ recheck:
 	}
 	if (attr->sched_flags & ~(SCHED_FLAG_RESET_ON_FORK))
 		return -EINVAL;
-
+	/*
+	the priority of a ss_task is based on his deadline . due to compabillity issues , if i add a record in sched_param struct , i used the
+	sched_param->sched_priority as parameter . every task except ss_task has at most MAX_PRIO priority. above that . is the priority of
+	ss_scheduler . to convert a sched_param->sched_priority to deadline . just use the PRIO_TO_SS_DEADLINE macro defined in ss.h
+	this checks for invalid user priority given!*/
 	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(ss_policy(policy)&&!ss_prio(attr->deadline)){
 			ss_debug("invalid ss policy , -EINVAL");
 			return -EINVAL;
 		}
-		ss_debug("valid ss_policy , proceed");
 	#endif
+	temp_debug("check mm");
 	/*
 	 * Valid priorities for SCHED_FIFO and SCHED_RR are
 	 * 1..MAX_USER_RT_PRIO-1, valid priority for SCHED_NORMAL,
@@ -3456,6 +3460,7 @@ recheck:
 	/*
 	 * Allow unprivileged RT tasks to decrease priority:
 	 */
+	temp_debug("go to capable(CAP_SYS_NICE)");
 	if (user && !capable(CAP_SYS_NICE)) {
 		if (fair_policy(policy)) {
 			if (attr->sched_nice < task_nice(p) &&
