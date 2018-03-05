@@ -37,7 +37,7 @@ static void 	/**/		enqueue_task_ss		(struct rq *rq,struct task_struct *p,int wak
 static void 	/**/		dequeue_task_ss		(struct rq *rq,struct task_struct *p,int sleep);
 static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task,int flags);
 static struct	task_struct*	pick_next_task_ss	(struct rq *rq,struct task_struct *prev);
-
+static void	/**/		task_tick_ss		(struct rq *rq,struct task_struct *p,int queued);
 
 const struct sched_class ss_sched_class={
 /*[*]*/	.next			= &dl_sched_class,	//has the next scheduling module , the real time linux scheduler
@@ -45,6 +45,7 @@ const struct sched_class ss_sched_class={
 /*[t]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
 /*[t]*/	.check_preempt_curr	= check_preempt_curr_ss,//called to check if the newrly created task must preempt the current one...
 /*[t]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
+	.task_tick		= task_tick_ss	,	//every ms the task_tick_ss subtracts 1 from absolute deadline!
 };
 
 /*
@@ -149,10 +150,21 @@ version_before  version_after           brief                   solution        
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
 	struct ss_task *retval = get_earliest_ss_task(&rq->ss_rq);
-	
 	if(!retval){
 		return NULL;
 	}
 	return retval->task;
 }
 SS_EXPORT_IF_DEBUG(pick_next_task_ss);
+/*
+task_tick_ss(struct rq*,struct task_struct*,int queued)
+	ticks in every timer interrupt , removes 1 from relative deadline of the task
+@param rq 	 the current runqueue
+@param p  	 the current running struct
+@param queued	 1 in case of TASK_ON_RQ_QUEUED
+*/
+static void task_tick_ss(struct rq*rq,struct task_struct*p,int queued){
+	p->deadline-=1;
+	if(p->deadline==0)resched_curr(rq);
+}
+SS_EXPORT_IF_DEBUG(task_tick_ss);
