@@ -156,7 +156,7 @@ extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task,
 	ptr->absolute_deadline=attr->deadline;
 	ptr->task->deadline=0;					//TODO: find a way to pass the relative deadline!
 	list_add(&ptr->ss_list_node,&ss_rq->ss_list);
-	ss_debug("task:%px on runqueue:%px requested to schedule with sscheduler with deadline %d ",ss_task,ss_rq,attr->deadline);
+	ss_debug("inserted task:%px on runqueue:%px  with deadline %d ",ss_task,ss_rq,attr->deadline);
         return 0;
 }
 /*

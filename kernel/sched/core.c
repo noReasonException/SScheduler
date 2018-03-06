@@ -3445,8 +3445,6 @@ recheck:
 			return -EINVAL;
 		}
 	#endif
-	temp_debug("check mm");
-
 	#ifdef CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(!ss_policy(policy)){
 	#endif
@@ -3467,7 +3465,6 @@ recheck:
 	/*
 	 * Allow unprivileged RT tasks to decrease priority:
 	 */
-	temp_debug("go to capable(CAP_SYS_NICE)");
 	if (user && !capable(CAP_SYS_NICE)) {
 		if (fair_policy(policy)) {
 			if (attr->sched_nice < task_nice(p) &&
@@ -3532,8 +3529,26 @@ recheck:
 	/*in case of ss_policy , then this task must be added to ss_rq list , so the pick_next_task_ss detect it and schedules it!*/
 	#ifdef 	CONFIG_SCHED_STEF_POLICY_CONFIG
 		if(ss_policy(policy)){
-			temp_debug("insert ss_task_rq_list on %px",p);
+			struct sched_class* prev_class = p->sched_class;
+			int oldprio=p->prio;
+
+			//migrate old to new!
+			p->prio=attr->sched_priority;
+
+
 			insert_ss_task_rq_list(&rq->ss_rq,p,attr); 	//insert task on sscheduler runqueue
+			dequeue_task(rq,p,0);				//dequeue from previous sched_class
+			temp_debug("dequeued!");
+
+			 p->sched_class=&ss_sched_class;                 //change policy
+                        temp_debug("ss_sched_class set!");
+
+			enqueue_task(rq,p,0);				//enqueue in ss structs
+			temp_debug("enqueued!");
+	//		check_class_changed(rq, p, prev_class, oldprio);
+	//		temp_debug("inform previous scheduler with change!");
+			set_tsk_need_resched(p);
+                        temp_debug("set_tsk_need_resched");
 			task_rq_unlock(rq,p,&flags);			//release runqueue lock
 			return 0;					//success!
 		}

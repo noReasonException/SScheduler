@@ -38,14 +38,15 @@ static void 	/**/		dequeue_task_ss		(struct rq *rq,struct task_struct *p,int sle
 static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task,int flags);
 static struct	task_struct*	pick_next_task_ss	(struct rq *rq,struct task_struct *prev);
 static void	/**/		task_tick_ss		(struct rq *rq,struct task_struct *p,int queued);
-
+static void	/**/		put_prev_task_ss	(struct rq *rq,struct task_struct *p);
 const struct sched_class ss_sched_class={
 /*[*]*/	.next			= &dl_sched_class,	//has the next scheduling module , the real time linux scheduler
 /*[t]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
 /*[t]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
 /*[t]*/	.check_preempt_curr	= check_preempt_curr_ss,//called to check if the newrly created task must preempt the current one...
 /*[t]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
-	.task_tick		= task_tick_ss	,	//every ms the task_tick_ss subtracts 1 from absolute deadline!
+/*[t]*/	.task_tick		= task_tick_ss	,	//every ms the task_tick_ss subtracts 1 from absolute deadline!
+/*[c]*/	.put_prev_task		= put_prev_task_ss,
 };
 
 /*
@@ -70,7 +71,7 @@ static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 			printk(KERN_CRIT"ss:new task submitted");		//debug purposes...
 		}
 	}
-	ss_debug("enqueue_task_ss invoked on rq:%pK and task_struct :%pK",rq,p);
+	ss_debug("enqueue_task_ss invoked on rq:%px and task_struct :%px",rq,p);
 
 }
 SS_EXPORT_IF_DEBUG(enqueue_task_ss);
@@ -94,7 +95,7 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 			}*/
 		}
 	}
-	ss_debug("dequeue_task_ss invoked on rq:%pK and task_struct :%pK",rq,p);
+	ss_debug("dequeue_task_ss invoked on rq:%pK and task_struct :%px",rq,p);
 }
 SS_EXPORT_IF_DEBUG(dequeue_task_ss);
 /*check_preempt_curr_ss
@@ -134,7 +135,7 @@ static void check_preempt_curr_ss (struct rq *rq,struct task_struct *task,int fl
 			}
 		}
 	}
-	ss_debug("check_preempt_task_ss invoked on rq:%pK and task_struct :%pK",rq,task);
+	ss_debug("check_preempt_task_ss invoked on rq:%px and task_struct :%px",rq,task);
 
 }
 SS_EXPORT_IF_DEBUG(check_preempt_curr_ss);
@@ -153,7 +154,8 @@ static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *p
 	if(!retval){
 		return NULL;
 	}
-	return retval->task;
+	//return NULL;
+	return retval->task; 			//for debbugging purposes only!
 }
 SS_EXPORT_IF_DEBUG(pick_next_task_ss);
 /*
@@ -168,3 +170,7 @@ static void task_tick_ss(struct rq*rq,struct task_struct*p,int queued){
 	if(p->deadline==0)resched_curr(rq);
 }
 SS_EXPORT_IF_DEBUG(task_tick_ss);
+static void put_prev_task_ss(struct rq*rq,struct task_struct*p){
+	return;
+
+}
