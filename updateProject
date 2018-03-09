@@ -24,7 +24,8 @@ cp ~/linux-stable/kernel/sched/core.c ~/SScheduler/kernel/sched/core.c
 echo -e "\t core.c \t[OK]"
 cp ~/linux-stable/kernel/sched/Makefile ~/SScheduler/kernel/sched/Makefile
 echo -e "\t Makefile \t[OK]"
-
+cp ~/linux-stable/kernel/sched/stop_task.c ~/SScheduler/kernel/sched/stop_task.c
+echo -e "\t stop_task.c \t[OK]"
 
 
 echo "/arch/x86"
