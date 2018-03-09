@@ -41,12 +41,12 @@ static void	/**/		task_tick_ss		(struct rq *rq,struct task_struct *p,int queued)
 static void	/**/		put_prev_task_ss	(struct rq *rq,struct task_struct *p);
 const struct sched_class ss_sched_class={
 /*[*]*/	.next			= &dl_sched_class,	//has the next scheduling module , the real time linux scheduler
-/*[t]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
+/*[*]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
 /*[t]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
 /*[t]*/	.check_preempt_curr	= check_preempt_curr_ss,//called to check if the newrly created task must preempt the current one...
 /*[t]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
 /*[t]*/	.task_tick		= task_tick_ss	,	//every ms the task_tick_ss subtracts 1 from absolute deadline!
-/*[c]*/	.put_prev_task		= put_prev_task_ss,
+/*[t]*/	.put_prev_task		= put_prev_task_ss,
 };
 
 /*
@@ -59,19 +59,16 @@ static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 	struct ss_task *t=NULL; 		//every task_struct has a ss_task inside
 	if(p){
 		if((t=find_ss_task(&rq->ss_rq,p))){
-			t->absolute_deadline=sched_clock()+p->deadline;		//update new deadline!
-			if(atomic_read(&rq->ss_rq.nr_running)){
-				insert_ss_task_rb_tree(&rq->ss_rq,t,SS_NOFLAG);         //add to red black tree
+			//t->absolute_deadline=sched_clock()+p->deadline;		//update new deadline!(Commented for debug TODO Remove)
+			if(!atomic_read(&rq->ss_rq.nr_running)){				//in case that this enqueue will be the first..
+				insert_ss_task_rb_tree(&rq->ss_rq,t,SS_NOFLAG);         //add to red black tree , but not rebalance it!
 			}
 			else{
-				insert_ss_task_rb_tree(&rq->ss_rq,t,SS_ALLOW_RECOLOR);         //add to red black tree
+				insert_ss_task_rb_tree(&rq->ss_rq,t,SS_ALLOW_RECOLOR);  //add to red black tree(+ rebalance)
 			}
-			insert_ss_task_rb_tree(&rq->ss_rq,t,SS_NOFLAG);		//add to red black tree
-			atomic_inc(&rq->ss_rq.nr_running);			//add one to current ss running processes!
-			printk(KERN_CRIT"ss:new task submitted");		//debug purposes...
+			atomic_inc(&rq->ss_rq.nr_running);				//add one to current ss running processes!
 		}
 	}
-	ss_debug("enqueue_task_ss invoked on rq:%px and task_struct :%px",rq,p);
 
 }
 SS_EXPORT_IF_DEBUG(enqueue_task_ss);
@@ -150,12 +147,14 @@ version_before  version_after           brief                   solution        
                                                                 in 3.15-rc1)
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
+	ss_debug("pick called!");
+	return NULL;//test purposes //TODO REMOVE!
 	struct ss_task *retval = get_earliest_ss_task(&rq->ss_rq);
 	if(!retval){
 		return NULL;
 	}
-	//return NULL;
-	return retval->task; 			//for debbugging purposes only!
+	ss_debug("pick_next_task_ss returns ss_task in %px",retval);
+	return retval->task;
 }
 SS_EXPORT_IF_DEBUG(pick_next_task_ss);
 /*
@@ -167,7 +166,7 @@ task_tick_ss(struct rq*,struct task_struct*,int queued)
 */
 static void task_tick_ss(struct rq*rq,struct task_struct*p,int queued){
 	p->deadline-=1;
-	if(p->deadline==0)resched_curr(rq);
+	if(p->deadline==0)set_tsk_need_resched(p);
 }
 SS_EXPORT_IF_DEBUG(task_tick_ss);
 static void put_prev_task_ss(struct rq*rq,struct task_struct*p){
