@@ -12,6 +12,7 @@ extern void resched_curr(struct rq *rq); //forward declaration
 /*[t]*/extern int 		remove_ss_task_rb_tree	(struct ss_rq*,struct ss_task*);
 /*[c]*/extern int 		remove_ss_task_rq_list	(struct ss_rq*ss_rq,struct ss_task*ss_task);
 /*[c]*/extern int 		insert_ss_task_rq_list	(struct ss_rq*ss_rq,struct task_struct*ss_task);
+/*[*]*/extern void		init_ss_rq		(struct ss_rq*ss_rq,int cpu_id);
 /*
 main scheduling class for Stefs EDF RT Scheduler
 by noReasonException
@@ -36,22 +37,26 @@ Notes -> to 0.0.1 final
 
 
 /*Forward Declarations...*/
-static void 	/**/		enqueue_task_ss		(struct rq *rq,struct task_struct *p,int wakeup);
-static void 	/**/		dequeue_task_ss		(struct rq *rq,struct task_struct *p,int sleep);
-static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task,int flags);
-static struct	task_struct*	pick_next_task_ss	(struct rq *rq,struct task_struct *prev);
-static void	/**/		task_tick_ss		(struct rq *rq,struct task_struct *p,int queued);
-static void	/**/		put_prev_task_ss	(struct rq *rq,struct task_struct *p);
-static void 	/**/		yield_task_ss		(struct rq *rq);
+static struct   task_struct*    pick_next_task_ss       (struct rq *rq  ,struct task_struct *prev);
+static void 	/*----*/	enqueue_task_ss		(struct rq *rq	,struct task_struct *p,int wakeup);
+static void 	/*----*/	dequeue_task_ss		(struct rq *rq	,struct task_struct *p,int sleep);
+static void 	/*----*/	check_preempt_curr_ss	(struct rq *rq	,struct task_struct *task,int flags);
+static void	/*----*/	task_tick_ss		(struct rq *rq	,struct task_struct *p,int queued);
+static void	/*----*/	put_prev_task_ss	(struct rq *rq	,struct task_struct *p);
+static void 	/*----*/	yield_task_ss		(struct rq *rq)	;
+static void     /*----*/	set_curr_task_ss        (struct rq *rq)	;
+static void 	/*----*/	task_move_group_ss			(struct task_struct *p);
 const struct sched_class ss_sched_class={
 /*[*]*/	.next			= &dl_sched_class,	//has the next scheduling module , the real time linux scheduler
 /*[*]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
-/*[t]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
+/*[*]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
 /*[t]*/	.check_preempt_curr	= check_preempt_curr_ss,//called to check if the newrly created task must preempt the current one...
 /*[*]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
 /*[t]*/	.task_tick		= task_tick_ss	,	//every ms the task_tick_ss subtracts 1 from absolute deadline!
 /*[*]*/	.put_prev_task		= put_prev_task_ss,
-/*[c]*/	.yield_task		= yield_task_ss,	// when a task wants to exit from cpu
+/*[t]*/	.yield_task		= yield_task_ss,	// when a task wants to exit from cpu
+/*[c]*/	.set_curr_task		= set_curr_task_ss,
+/*[c]*/	.task_move_group	= task_move_group_ss,
 };
 
 /*
@@ -61,6 +66,7 @@ enqueue_task_ss	procedure , is called by linux scheduler's class system when a s
 @param int wakeup
 */
 static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
+	//debug_stop=0;				//TODO developemt purposes , remove!
 	struct ss_task *t=NULL; 		//every task_struct has a ss_task inside
 	if(p){
 		if((t=find_ss_task(&rq->ss_rq,p))){
@@ -89,6 +95,7 @@ is called by linux scheduler's class system when a ss task want to quit from TAS
 static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 {
 	struct ss_task *t=NULL;
+	debug_stop=1;
 	if(p){
 		if((t=find_ss_task(&rq->ss_rq,p))){
 			remove_ss_task_rb_tree(&rq->ss_rq,t);
@@ -98,7 +105,11 @@ static void dequeue_task_ss(struct rq *rq , struct task_struct *p,int sleep)
 			}*/
 		}
 	}
-	ss_debug("dequeue_task_ss invoked on rq:%pK and task_struct :%px",rq,p);
+	if(!atomic_read(&rq->ss_rq.nr_running)){
+		init_ss_rq(&rq->ss_rq,cpu_of(rq));
+		ss_debug("re-initialize rbtree");
+	}
+	ss_debug("dequeue_task_ss invoked on rq:%px and task_struct :%px with deadline %lld",rq,p,p->deadline);
 }
 SS_EXPORT_IF_DEBUG(dequeue_task_ss);
 /*check_preempt_curr_ss
@@ -174,6 +185,7 @@ static void task_tick_ss(struct rq*rq,struct task_struct*p,int queued){
 		set_tsk_need_resched(p);
 		debug_stop=0;
 		ss_debug("task (%px) on rq(%px) stopped by deadline",p,rq);
+		resched_curr(rq);
 	}
 }
 SS_EXPORT_IF_DEBUG(task_tick_ss);
@@ -191,7 +203,16 @@ Called when a ss_task wants voluntarily to preempt by another task
 */
 static void yield_task_ss (struct rq *rq){
 	ss_debug("yield_task_ss requested on rq(%px)",rq);
+	set_tsk_need_resched(rq->curr);
 	resched_curr(rq);
 	debug_stop=0; //for develepoment purposes
 }
 SS_EXPORT_IF_DEBUG(yield_task_ss);
+static void set_curr_task_ss (struct rq *rq) {
+	return ;//EOPNOTSUPP
+}
+static void task_move_group_ss (struct task_struct *p){
+	return ;//EOPNOTSUPP
+
+}
+

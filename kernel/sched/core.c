@@ -3544,9 +3544,7 @@ recheck:
                         temp_debug("ss_sched_class set!");
 
 			enqueue_task(rq,p,0);				//enqueue in ss structs
-			temp_debug("enqueued!");
-	//		check_class_changed(rq, p, prev_class, oldprio);
-	//		temp_debug("inform previous scheduler with change!");
+			temp_debug("enqueued!");	//---///---///---///---///---///---///---///---///--///
 			set_tsk_need_resched(p);
                         temp_debug("set_tsk_need_resched");
 			task_rq_unlock(rq,p,&flags);			//release runqueue lock
