@@ -23,7 +23,7 @@ extern int ss_utill_task_is_dead(struct ss_task *ss_task){
 SS_EXPORT_IF_DEBUG(ss_utill_task_is_dead);
 /*
 struct ss_task *find_ss_task (struct ss_rq *ss_rq,struct task_struct *p)
-[t]
+[*]
 @brief Search and return the ss_task struct of the task_struct * given on runqueue given
 @note  Just iterate over ss_rq->ss_list(i) , if if(i->task==p) return p , otherwise return NULL (meaning that the
 task_struct given has not STEF_SCHED policy! :))
@@ -48,7 +48,7 @@ extern struct ss_task *find_ss_task(struct ss_rq *ss_rq,struct task_struct *p){
 SS_EXPORT_IF_DEBUG(find_ss_task);
 /*
 struct ss_task *get_earliest_ss_task(struct ss_rq*)
-[t]
+[*]
 @version 0.0.1
 @brief picks the leftmost node(with earliest deadline ;) )
 @param struct ss_rq , the currenly runqueue
@@ -62,7 +62,7 @@ extern struct ss_task *get_earliest_ss_task(struct ss_rq*ss_rq){
 }
 /*
 int insert_ss_task_rb_tree(struct ss_rq*,struct ss_task*)
-[t]
+[*]
 @version 0.0.2
 Imports a new task into sscheduler's red-black tree!
 @param struct ss_rq  * ss_rq   -> The current runqueue
@@ -146,7 +146,7 @@ extern int remove_ss_task_rq_list(struct ss_rq*ss_rq,struct ss_task*ss_task){
 }
 /*
 insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct *ss_task)
-[t]
+[*]
 adds a new task_struct into runqueue
 @param 		ss_rq 	 	the current runqueue
 @param		ss_task		the task to add in current runqueue
@@ -166,6 +166,7 @@ extern int insert_ss_task_rq_list(struct ss_rq*ss_rq,struct task_struct*ss_task,
 }
 /*
 extern int ss_prio(int prio)
+[*]
 checks if the given prio belongs to sscheduler
 @param prio , the priority to check!
 @Note : The priority of sscheduler , is the deadline of the task . because we cant

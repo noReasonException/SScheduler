@@ -1,6 +1,9 @@
 #include "sched.h"
 #include "ss_debug.h"
 #include "ss.h"
+
+int debug_stop=1;  //for debug purposes , stops the ss_scheduler //TODO remove for version 1.0
+
 extern void resched_curr(struct rq *rq); //forward declaration
 /*[t]*/extern struct ss_task * 	find_ss_task		(struct ss_rq *,struct task_struct *);
 /*[t]*/extern int		ss_utill_task_is_dead	(struct task_struct *p);
@@ -18,12 +21,12 @@ last edited 7/2/2018
 Notes -> to 0.0.1 final
 *)Dont forget to implement...
 	Name			Description
-[t]	find_ss_task 		(check enqueue_task_ss)
-[t]	insert_ss_task_rb_tree	(check again , the enqueue_task_ss)
-[n]	remove_ss_task_rb_tree 	(this time check dequeue_task)
+[*]	find_ss_task 		(check enqueue_task_ss)
+[*]]	insert_ss_task_rb_tree	(check again , the enqueue_task_ss)
+[t]	remove_ss_task_rb_tree 	(this time check dequeue_task)
 [t]	ss_utill_task_is_dead	(must remove from linked list?(state ZOMBIE||DEAD),see dequeue_task)
 [n]	remove_ss_task_list	(remome ss_task from linked list)
-[t]	get_earliest_ss_task	(Check the check_preempt_curr)
+[*]	get_earliest_ss_task	(Check the check_preempt_curr)
 *)Some conversions...
 [n] :Function non implemented
 [c] :Currently Working on...
@@ -39,14 +42,16 @@ static void 	/**/		check_preempt_curr_ss	(struct rq *rq,struct task_struct *task
 static struct	task_struct*	pick_next_task_ss	(struct rq *rq,struct task_struct *prev);
 static void	/**/		task_tick_ss		(struct rq *rq,struct task_struct *p,int queued);
 static void	/**/		put_prev_task_ss	(struct rq *rq,struct task_struct *p);
+static void 	/**/		yield_task_ss		(struct rq *rq);
 const struct sched_class ss_sched_class={
 /*[*]*/	.next			= &dl_sched_class,	//has the next scheduling module , the real time linux scheduler
 /*[*]*/	.enqueue_task		= enqueue_task_ss,	//called when a new ss task changes status to TASK_RUNNING
 /*[t]*/	.dequeue_task		= dequeue_task_ss,	//called when a ss RUNNING task blocks
 /*[t]*/	.check_preempt_curr	= check_preempt_curr_ss,//called to check if the newrly created task must preempt the current one...
-/*[t]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
+/*[*]*/	.pick_next_task		= pick_next_task_ss,	//chooses the most appropiate next ss task to run!
 /*[t]*/	.task_tick		= task_tick_ss	,	//every ms the task_tick_ss subtracts 1 from absolute deadline!
-/*[t]*/	.put_prev_task		= put_prev_task_ss,
+/*[*]*/	.put_prev_task		= put_prev_task_ss,
+/*[c]*/	.yield_task		= yield_task_ss,	// when a task wants to exit from cpu
 };
 
 /*
@@ -149,11 +154,10 @@ version_before  version_after           brief                   solution        
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
 	struct ss_task *retval = get_earliest_ss_task(&rq->ss_rq);
-	if(!retval){
+	if(!retval || !debug_stop){
 		return NULL;
 	}
 	ss_debug("pick_next_task_ss returns ss_task in %px",retval);
-	return NULL;
 	return retval->task;
 }
 SS_EXPORT_IF_DEBUG(pick_next_task_ss);
@@ -166,10 +170,28 @@ task_tick_ss(struct rq*,struct task_struct*,int queued)
 */
 static void task_tick_ss(struct rq*rq,struct task_struct*p,int queued){
 	p->deadline-=1;
-	if(p->deadline==0)set_tsk_need_resched(p);
+	if(p->deadline<00){
+		set_tsk_need_resched(p);
+		debug_stop=0;
+		ss_debug("task (%px) on rq(%px) stopped by deadline",p,rq);
+	}
 }
 SS_EXPORT_IF_DEBUG(task_tick_ss);
+
+/*EOPNOSUPP*/
 static void put_prev_task_ss(struct rq*rq,struct task_struct*p){
 	return;
 
 }
+SS_EXPORT_IF_DEBUG(put_prev_task_ss);
+/**
+[c] yield_task_ss(struct rq*rq)
+Called when a ss_task wants voluntarily to preempt by another task
+@param struct rq *rq , the current runqueue
+*/
+static void yield_task_ss (struct rq *rq){
+	ss_debug("yield_task_ss requested on rq(%px)",rq);
+	resched_curr(rq);
+	debug_stop=0; //for develepoment purposes
+}
+SS_EXPORT_IF_DEBUG(yield_task_ss);
