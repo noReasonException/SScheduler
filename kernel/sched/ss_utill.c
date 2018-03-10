@@ -55,9 +55,10 @@ struct ss_task *get_earliest_ss_task(struct ss_rq*)
 */
 extern struct ss_task *get_earliest_ss_task(struct ss_rq*ss_rq){
 	struct rb_node *temp = ss_rq->ss_root.rb_node;
-	if(atomic_read(&ss_rq->nr_running)==0)return NULL;		//if no tasks exist in runqueue , then return NULL
-	while(temp->rb_left)temp=temp->rb_left;				//traverse the list untill the left node is null
-	return (struct ss_task*)rb_entry(temp,struct ss_task,ss_node);	//return the task existed there! :)
+	if(atomic_read(&ss_rq->nr_running)==0||
+				temp==NULL)return NULL;				//if no tasks exist in runqueue , then return NULL
+	while(temp->rb_left)temp=temp->rb_left;					//traverse the list untill the left node is null
+	return (struct ss_task*)rb_entry(temp,struct ss_task,ss_node);		//return the task existed there! :)
 }
 /*
 int insert_ss_task_rb_tree(struct ss_rq*,struct ss_task*)
@@ -78,24 +79,28 @@ version_before  version_after           brief                   solution        
 */
 SS_EXPORT_IF_DEBUG(get_earliest_ss_task);
 extern int insert_ss_task_rb_tree (struct ss_rq*ss_rq,struct ss_task*ss_task,int flags){
-	struct rb_node * temp  = ss_rq->ss_root.rb_node ;	//At first , temp node starts from root node!
+	struct rb_node ** temp  = &(ss_rq->ss_root.rb_node) ;	//At first , temp node starts from root node!
 	struct rb_node * parent= NULL;				//..and of course , has no parent :P
 	struct ss_task * temp_container=NULL;			//temp's container
-	while(temp) {						//while temp variable isnt NULL (0)
-		temp_container=container_of(temp,struct ss_task,ss_node);
-		parent=temp;
+	ss_debug("insert_ss_task_rb_tree on rq(%px) on ss_task(%px) with flag %s on initial_root (%px)",
+												ss_rq,
+												ss_task,
+												flags,
+												temp);
+	while(*temp) {
+		temp_container=container_of(*temp,struct ss_task,ss_node);
+		parent=*temp;
 		if(ss_task->absolute_deadline< temp_container->absolute_deadline){
-			temp=temp->rb_left;
+			ss_debug("LEFT");
+			temp=&(*temp)->rb_left;
 		}
 		else if(ss_task->absolute_deadline > temp_container->absolute_deadline){
-			temp=temp->rb_right;
+			ss_debug("RIGHT");
+			temp=&(*temp)->rb_right;
 		}
-		else{
-			printk(KERN_ERR"insert_ss_task_rb_tree: fail due to deadline confict! ");
-			return 0;
-		}
+		else return 0;
 	}
-	rb_link_node(&ss_task->ss_node,parent,&temp);		//insert into rbtree
+	rb_link_node(&ss_task->ss_node,parent,temp);		//insert into rbtree
 	if(flags&SS_ALLOW_RECOLOR){
 		rb_insert_color(&ss_task->ss_node,&ss_rq->ss_root);	//rebalance if nessesary
 	}

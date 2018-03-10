@@ -69,6 +69,7 @@ static void enqueue_task_ss(struct rq *rq,struct task_struct *p,int wakeup){
 			atomic_inc(&rq->ss_rq.nr_running);				//add one to current ss running processes!
 		}
 	}
+	ss_debug("enqueue_task_ss on rq %px in task %px completed , get earliest task return %px",rq,p,get_earliest_ss_task(&rq->ss_rq));
 
 }
 SS_EXPORT_IF_DEBUG(enqueue_task_ss);
@@ -147,13 +148,12 @@ version_before  version_after           brief                   solution        
                                                                 in 3.15-rc1)
 */
 static struct task_struct *pick_next_task_ss(struct rq *rq,struct task_struct *prev){
-	ss_debug("pick called!");
-	return NULL;//test purposes //TODO REMOVE!
 	struct ss_task *retval = get_earliest_ss_task(&rq->ss_rq);
 	if(!retval){
 		return NULL;
 	}
 	ss_debug("pick_next_task_ss returns ss_task in %px",retval);
+	return NULL;
 	return retval->task;
 }
 SS_EXPORT_IF_DEBUG(pick_next_task_ss);
